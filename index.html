@@ -176,7 +176,7 @@
         let currentView = 'main'; // 'main', 'games' или 'game'
         let currentGameFrame = null;
 
-        // Функции управления интерфейсом
+        // Функция показа главного меню
         function showMainMenu() {
             currentView = 'main';
             document.getElementById('gamesMenu').style.display = 'none';
@@ -186,6 +186,7 @@
             tg.BackButton.hide();
         }
 
+        // Функция показа меню игр
         function showGamesMenu() {
             currentView = 'games';
             document.querySelectorAll('#app > button').forEach(btn => {
@@ -196,6 +197,7 @@
             tg.BackButton.onClick(showMainMenu);
         }
 
+        // Функция открытия игры
         function openGame(frameId) {
             currentView = 'game';
             currentGameFrame = frameId;
@@ -211,15 +213,17 @@
             frame.style.display = 'block';
 
             tg.BackButton.show();
-            tg.BackButton.onClick(() => {
-                closeGame();
-            });
+            tg.BackButton.onClick(closeGame);
         }
 
+        // Функция закрытия игры
         function closeGame() {
-            const frame = document.getElementById(currentGameFrame);
-            frame.src = 'about:blank';
-            frame.style.display = 'none';
+            if (currentGameFrame) {
+                const frame = document.getElementById(currentGameFrame);
+                frame.src = 'about:blank';
+                frame.style.display = 'none';
+                currentGameFrame = null;
+            }
             
             document.getElementById('app').style.display = 'flex';
             showGamesMenu();
@@ -239,7 +243,12 @@
             document.getElementById('supportBtn').addEventListener('click', () => {
                 tg.openTelegramLink('https://t.me/Zer0_Emission_Support');
             });
-            document.getElementById('backBtn').addEventListener('click', showMainMenu);
+            
+            // Обработчик кнопки "Назад" - теперь работает правильно
+            document.getElementById('backBtn').addEventListener('click', () => {
+                showMainMenu();
+                tg.BackButton.hide();
+            });
 
             document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
             document.getElementById('pacmanBtn').addEventListener('click', () => openGame('pacmanFrame'));
