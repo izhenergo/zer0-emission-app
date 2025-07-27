@@ -1,114 +1,117 @@
+// Инициализация Telegram WebApp
 const tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
 tg.ready();
 
 // Состояние приложения
-let currentView = 'main'; // 'main' | 'games' | 'game'
-let currentGameFrame = null;
+const AppState = {
+    currentView: 'main', // 'main' | 'games' | 'game'
+    currentGame: null
+};
 
-// Элементы интерфейса
-const elements = {
+// Кэшируем элементы
+const DOM = {
     splash: document.getElementById('splash'),
     app: document.getElementById('app'),
     gamesMenu: document.getElementById('gamesMenu'),
-    playBtn: document.getElementById('playBtn'),
-    supportBtn: document.getElementById('supportBtn'),
-    backBtn: document.getElementById('backBtn'),
-    clumsyBirdBtn: document.getElementById('clumsyBirdBtn'),
-    pacmanBtn: document.getElementById('pacmanBtn'),
-    clumsyBirdFrame: document.getElementById('clumsyBirdFrame'),
-    pacmanFrame: document.getElementById('pacmanFrame')
+    buttons: {
+        play: document.getElementById('playBtn'),
+        support: document.getElementById('supportBtn'),
+        back: document.getElementById('backBtn'),
+        clumsyBird: document.getElementById('clumsyBirdBtn'),
+        pacman: document.getElementById('pacmanBtn')
+    },
+    frames: {
+        clumsyBird: document.getElementById('clumsyBirdFrame'),
+        pacman: document.getElementById('pacmanFrame')
+    }
 };
 
 // Конфигурация
-const config = {
+const Config = {
     games: {
-        clumsyBirdFrame: 'https://izhenergo.github.io/Clumsy_Bird/',
-        pacmanFrame: 'https://izhenergo.github.io/Pacman_Canvas/'
+        clumsyBird: 'https://izhenergo.github.io/Clumsy_Bird/',
+        pacman: 'https://izhenergo.github.io/Pacman_Canvas/'
     },
     supportLink: 'https://t.me/Zer0_Emission_Support'
 };
 
-// Основные функции навигации
-function showView(view) {
-    // Скрываем все элементы
-    elements.app.style.display = 'none';
-    elements.gamesMenu.style.display = 'none';
-    elements.clumsyBirdFrame.style.display = 'none';
-    elements.pacmanFrame.style.display = 'none';
+// Управление отображением
+function showMainScreen() {
+    // Сбрасываем состояние
+    AppState.currentView = 'main';
+    AppState.currentGame = null;
 
-    // Показываем нужный view
-    switch(view) {
-        case 'main':
-            elements.app.style.display = 'flex';
-            elements.playBtn.style.display = 'block';
-            elements.supportBtn.style.display = 'block';
-            tg.BackButton.hide();
-            break;
+    // Показываем основной интерфейс
+    DOM.app.style.display = 'flex';
+    DOM.buttons.play.style.display = 'block';
+    DOM.buttons.support.style.display = 'block';
+    DOM.gamesMenu.style.display = 'none';
 
-        case 'games':
-            elements.app.style.display = 'flex';
-            elements.gamesMenu.style.display = 'flex';
-            elements.playBtn.style.display = 'none';
-            elements.supportBtn.style.display = 'none';
-            tg.BackButton.show();
-            break;
+    // Скрываем все игры
+    Object.values(DOM.frames).forEach(frame => {
+        frame.style.display = 'none';
+        frame.src = 'about:blank';
+    });
 
-        case 'game':
-            if (currentGameFrame) {
-                elements[currentGameFrame].style.display = 'block';
-            }
-            tg.BackButton.show();
-            break;
+    tg.BackButton.hide();
+}
+
+function showGamesMenu() {
+    AppState.currentView = 'games';
+    DOM.buttons.play.style.display = 'none';
+    DOM.buttons.support.style.display = 'none';
+    DOM.gamesMenu.style.display = 'flex';
+    tg.BackButton.show();
+}
+
+function startGame(gameId) {
+    if (!Config.games[gameId]) return;
+
+    AppState.currentView = 'game';
+    AppState.currentGame = gameId;
+
+    DOM.app.style.display = 'none';
+    DOM.frames[gameId].src = Config.games[gameId];
+    DOM.frames[gameId].style.display = 'block';
+
+    tg.BackButton.show();
+}
+
+function exitGame() {
+    if (AppState.currentGame) {
+        DOM.frames[AppState.currentGame].src = 'about:blank';
+        DOM.frames[AppState.currentGame].style.display = 'none';
+        AppState.currentGame = null;
     }
 
-    currentView = view;
+    showGamesMenu();
 }
 
-// Обработчики действий
-function handleBack() {
-    if (currentView === 'game') {
-        closeGame();
-    } else if (currentView === 'games') {
-        showView('main');
-    }
-}
+// Обработчики событий
+function setupEventListeners() {
+    // Основные кнопки
+    DOM.buttons.play.addEventListener('click', showGamesMenu);
+    DOM.buttons.support.addEventListener('click', () => {
+        tg.openTelegramLink(Config.supportLink);
+    });
 
-function openGame(frameId) {
-    if (!config.games[frameId]) return;
+    // Кнопки игр
+    DOM.buttons.clumsyBird.addEventListener('click', () => startGame('clumsyBird'));
+    DOM.buttons.pacman.addEventListener('click', () => startGame('pacman'));
 
-    currentGameFrame = frameId;
-    elements[frameId].src = config.games[frameId];
-    showView('game');
-}
+    // Кнопка "Назад"
+    DOM.buttons.back.addEventListener('click', showMainScreen);
 
-function closeGame() {
-    if (currentGameFrame) {
-        elements[currentGameFrame].src = 'about:blank';
-        currentGameFrame = null;
-    }
-    showView('games');
-}
-
-// Инициализация
-function init() {
-    // Показываем главный экран после загрузки
-    setTimeout(() => {
-        elements.splash.style.opacity = '0';
-        elements.splash.style.pointerEvents = 'none';
-        showView('main');
-    }, 500);
-
-    // Настройка кнопок
-    elements.playBtn.addEventListener('click', () => showView('games'));
-    elements.supportBtn.addEventListener('click', () => tg.openTelegramLink(config.supportLink));
-    elements.backBtn.addEventListener('click', handleBack);
-    elements.clumsyBirdBtn.addEventListener('click', () => openGame('clumsyBirdFrame'));
-    elements.pacmanBtn.addEventListener('click', () => openGame('pacmanFrame'));
-
-    // Настройка кнопки "Назад" в Telegram
-    tg.BackButton.onClick(handleBack);
+    // Системная кнопка "Назад"
+    tg.BackButton.onClick(() => {
+        if (AppState.currentView === 'game') {
+            exitGame();
+        } else if (AppState.currentView === 'games') {
+            showMainScreen();
+        }
+    });
 
     // iOS фиксы
     if (tg.platform === 'ios') {
@@ -117,5 +120,18 @@ function init() {
     }
 }
 
-// Запуск приложения
-document.addEventListener('DOMContentLoaded', init);
+// Инициализация приложения
+function initApp() {
+    // Скрываем splash screen
+    setTimeout(() => {
+        DOM.splash.style.opacity = '0';
+        DOM.splash.style.pointerEvents = 'none';
+        showMainScreen();
+    }, 500);
+
+    // Настраиваем обработчики
+    setupEventListeners();
+}
+
+// Запускаем приложение
+document.addEventListener('DOMContentLoaded', initApp);
