@@ -1,20 +1,19 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
-tg.enableClosingConfirmation();
 tg.ready();
 
 // Состояния приложения
-const AppState = {
-    MAIN: 'main',
-    GAMES_MENU: 'games',
-    IN_GAME: 'game'
+const STATE = {
+    MAIN: 0,
+    GAMES: 1,
+    GAME: 2
 };
 
-let currentState = AppState.MAIN;
+let currentState = STATE.MAIN;
 let currentGame = null;
 
-// Инициализация элементов
-const elements = {
+// Элементы
+const el = {
     splash: document.getElementById('splash'),
     app: document.getElementById('app'),
     gamesMenu: document.getElementById('gamesMenu'),
@@ -27,86 +26,80 @@ const elements = {
     pacmanFrame: document.getElementById('pacmanFrame')
 };
 
-// Функция для сброса всех состояний
-function resetViews() {
-    elements.app.style.display = 'none';
-    elements.gamesMenu.style.display = 'none';
-    elements.clumsyBirdFrame.style.display = 'none';
-    elements.pacmanFrame.style.display = 'none';
-    elements.playBtn.style.display = 'none';
-    elements.supportBtn.style.display = 'none';
+// Полностью очищаем все состояния
+function resetAll() {
+    el.app.style.display = 'none';
+    el.gamesMenu.style.display = 'none';
+    el.clumsyBirdFrame.style.display = 'none';
+    el.pacmanFrame.style.display = 'none';
+    el.playBtn.style.display = 'none';
+    el.supportBtn.style.display = 'none';
+
+    // Останавливаем все игры
+    el.clumsyBirdFrame.src = 'about:blank';
+    el.pacmanFrame.src = 'about:blank';
 }
 
-// Показать главный экран
-function showMainView() {
-    currentState = AppState.MAIN;
-    resetViews();
+// Показываем главный экран
+function showMain() {
+    resetAll();
+    currentState = STATE.MAIN;
 
-    elements.app.style.display = 'flex';
-    elements.playBtn.style.display = 'block';
-    elements.supportBtn.style.display = 'block';
+    el.app.style.display = 'flex';
+    el.playBtn.style.display = 'block';
+    el.supportBtn.style.display = 'block';
 
     tg.BackButton.hide();
 }
 
-// Показать меню игр
-function showGamesMenu() {
-    currentState = AppState.GAMES_MENU;
-    resetViews();
+// Показываем меню игр
+function showGames() {
+    resetAll();
+    currentState = STATE.GAMES;
 
-    elements.app.style.display = 'flex';
-    elements.gamesMenu.style.display = 'flex';
+    el.app.style.display = 'flex';
+    el.gamesMenu.style.display = 'flex';
 
     tg.BackButton.show();
+    tg.BackButton.onClick(showMain);
 }
 
-// Запустить игру
+// Запускаем игру
 function startGame(game) {
-    currentState = AppState.IN_GAME;
+    resetAll();
+    currentState = STATE.GAME;
     currentGame = game;
-    resetViews();
 
     const gameUrl = {
         clumsyBird: 'https://izhenergo.github.io/Clumsy_Bird/',
         pacman: 'https://izhenergo.github.io/Pacman_Canvas/'
     }[game];
 
-    elements[`${game}Frame`].src = gameUrl;
-    elements[`${game}Frame`].style.display = 'block';
+    el[`${game}Frame`].src = gameUrl;
+    el[`${game}Frame`].style.display = 'block';
 
     tg.BackButton.show();
+    tg.BackButton.onClick(() => {
+        el[`${game}Frame`].src = 'about:blank';
+        showGames();
+    });
 }
 
-// Обработчик кнопки "Назад"
-function handleBackButton() {
-    if (currentState === AppState.IN_GAME) {
-        elements[`${currentGame}Frame`].src = 'about:blank';
-        showGamesMenu();
-    } else if (currentState === AppState.GAMES_MENU) {
-        showMainView();
-    }
-}
-
-// Инициализация приложения
-function initApp() {
+// Инициализация
+function init() {
     // Скрываем splash screen
     setTimeout(() => {
-        elements.splash.style.opacity = '0';
-        elements.splash.style.pointerEvents = 'none';
-        showMainView();
+        el.splash.style.opacity = '0';
+        el.splash.style.pointerEvents = 'none';
+        showMain();
     }, 500);
 
     // Назначаем обработчики
-    elements.playBtn.addEventListener('click', showGamesMenu);
-    elements.supportBtn.addEventListener('click', () => {
-        tg.openTelegramLink('https://t.me/Zer0_Emission_Support');
-    });
-    elements.backBtn.addEventListener('click', showMainView);
-    elements.clumsyBirdBtn.addEventListener('click', () => startGame('clumsyBird'));
-    elements.pacmanBtn.addEventListener('click', () => startGame('pacman'));
-
-    // Обработчик системной кнопки "Назад"
-    tg.BackButton.onClick(handleBackButton);
+    el.playBtn.addEventListener('click', showGames);
+    el.supportBtn.addEventListener('click', () => tg.openTelegramLink('https://t.me/Zer0_Emission_Support'));
+    el.backBtn.addEventListener('click', showMain);
+    el.clumsyBirdBtn.addEventListener('click', () => startGame('clumsyBird'));
+    el.pacmanBtn.addEventListener('click', () => startGame('pacman'));
 
     // iOS фиксы
     if (tg.platform === 'ios') {
@@ -116,4 +109,4 @@ function initApp() {
 }
 
 // Запускаем приложение
-document.addEventListener('DOMContentLoaded', initApp);
+document.addEventListener('DOMContentLoaded', init);
