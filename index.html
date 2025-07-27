@@ -4,27 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zer0 Emission Games</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
+        body, html {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #000;
-            color: white;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: white;
         }
 
-        .screen {
-            display: none;
+        #app {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             padding: 20px;
         }
 
@@ -38,8 +44,8 @@
         }
 
         .btn {
-            width: 100%;
-            max-width: 250px;
+            width: 90%;
+            max-width: 300px;
             padding: 15px;
             margin: 10px 0;
             border: none;
@@ -47,116 +53,126 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
+            text-align: center;
         }
 
-        .btn-play {
+        .btn-primary {
             background: #4CAF50;
             color: white;
         }
 
-        .btn-support {
+        .btn-secondary {
             background: #2196F3;
             color: white;
         }
 
-        .btn-game {
-            background: #FF9800;
+        .btn-danger {
+            background: #f44336;
             color: white;
         }
 
-        .btn-back {
-            background: #F44336;
-            color: white;
-            margin-top: 20px;
-        }
-
-        iframe {
+        .game-container {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            border: none;
-            display: none;
         }
     </style>
 </head>
 <body>
-<!-- Главный экран -->
-<div id="mainScreen" class="screen">
-    <img src="ZE_logo.png" alt="Logo" class="logo">
-    <button id="playBtn" class="btn btn-play">ИГРЫ</button>
-    <button id="supportBtn" class="btn btn-support">ПОДДЕРЖКА</button>
+<div id="app">
+    <!-- Главный экран -->
+    <div id="mainScreen" class="screen">
+        <img src="ZE_logo.png" alt="Logo" class="logo">
+        <button id="playBtn" class="btn btn-primary">ИГРЫ</button>
+        <button id="supportBtn" class="btn btn-secondary">ПОДДЕРЖКА</button>
+    </div>
+
+    <!-- Меню игр -->
+    <div id="gamesScreen" class="screen">
+        <h2>ВЫБЕРИТЕ ИГРУ</h2>
+        <button id="clumsyBirdBtn" class="btn btn-primary">CLUMSY BIRD</button>
+        <button id="pacmanBtn" class="btn btn-primary">PACMAN</button>
+        <button id="backBtn" class="btn btn-danger">НАЗАД</button>
+    </div>
 </div>
 
-<!-- Меню игр -->
-<div id="gamesScreen" class="screen">
-    <h2>ВЫБЕРИТЕ ИГРУ</h2>
-    <button id="clumsyBirdBtn" class="btn btn-game">CLUMSY BIRD</button>
-    <button id="pacmanBtn" class="btn btn-game">PACMAN</button>
-    <button id="backBtn1" class="btn btn-back">НАЗАД</button>
-</div>
-
-<!-- Игровые фреймы -->
-<iframe id="clumsyBirdFrame"></iframe>
-<iframe id="pacmanFrame"></iframe>
+<!-- Контейнеры для игр -->
+<div id="clumsyBirdContainer" class="game-container"></div>
+<div id="pacmanContainer" class="game-container"></div>
 
 <script>
-    // Инициализация Telegram WebApp
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.BackButton.hide(); // Полностью отключаем системную кнопку
+    // Полностью изолированная система навигации
+    class GameApp {
+        constructor() {
+            this.screens = {
+                main: document.getElementById('mainScreen'),
+                games: document.getElementById('gamesScreen')
+            };
 
-    // Элементы интерфейса
-    const screens = {
-        main: document.getElementById('mainScreen'),
-        games: document.getElementById('gamesScreen')
-    };
+            this.containers = {
+                clumsyBird: document.getElementById('clumsyBirdContainer'),
+                pacman: document.getElementById('pacmanContainer')
+            };
 
-    const buttons = {
-        play: document.getElementById('playBtn'),
-        support: document.getElementById('supportBtn'),
-        back1: document.getElementById('backBtn1'),
-        clumsyBird: document.getElementById('clumsyBirdBtn'),
-        pacman: document.getElementById('pacmanBtn')
-    };
+            this.initButtons();
+            this.showScreen('main');
+        }
 
-    const frames = {
-        clumsyBird: document.getElementById('clumsyBirdFrame'),
-        pacman: document.getElementById('pacmanFrame')
-    };
+        initButtons() {
+            document.getElementById('playBtn').onclick = () => this.showScreen('games');
+            document.getElementById('supportBtn').onclick = () => window.open('https://t.me/Zer0_Emission_Support', '_blank');
+            document.getElementById('backBtn').onclick = () => this.showScreen('main');
 
-    // Показать экран
-    function showScreen(screen) {
-        // Скрыть все экраны и фреймы
-        Object.values(screens).forEach(s => s.style.display = 'none');
-        Object.values(frames).forEach(f => f.style.display = 'none');
+            document.getElementById('clumsyBirdBtn').onclick = () => this.startGame('clumsyBird');
+            document.getElementById('pacmanBtn').onclick = () => this.startGame('pacman');
+        }
 
-        // Показать нужный экран
-        if (screen === 'main' || screen === 'games') {
-            screens[screen].style.display = 'flex';
+        showScreen(screen) {
+            // Скрыть всё
+            Object.values(this.screens).forEach(s => s.style.display = 'none');
+            Object.values(this.containers).forEach(c => {
+                c.style.display = 'none';
+                c.innerHTML = '';
+            });
+
+            // Показать нужный экран
+            if (this.screens[screen]) {
+                this.screens[screen].style.display = 'flex';
+            }
+        }
+
+        startGame(game) {
+            this.showScreen('');
+
+            const gameUrl = {
+                clumsyBird: 'https://izhenergo.github.io/Clumsy_Bird/',
+                pacman: 'https://izhenergo.github.io/Pacman_Canvas/'
+            }[game];
+
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.src = gameUrl;
+
+            this.containers[game].appendChild(iframe);
+            this.containers[game].style.display = 'block';
         }
     }
 
-    // Запуск игры
-    function startGame(game) {
-        showScreen('');
-        frames[game].style.display = 'block';
-        frames[game].src = {
-            clumsyBird: 'https://izhenergo.github.io/Clumsy_Bird/',
-            pacman: 'https://izhenergo.github.io/Pacman_Canvas/'
-        }[game];
-    }
+    // Инициализация приложения
+    document.addEventListener('DOMContentLoaded', () => {
+        new GameApp();
 
-    // Обработчики событий
-    buttons.play.addEventListener('click', () => showScreen('games'));
-    buttons.support.addEventListener('click', () => tg.openTelegramLink('https://t.me/Zer0_Emission_Support'));
-    buttons.back1.addEventListener('click', () => showScreen('main'));
-    buttons.clumsyBird.addEventListener('click', () => startGame('clumsyBird'));
-    buttons.pacman.addEventListener('click', () => startGame('pacman'));
-
-    // Инициализация
-    showScreen('main');
+        // Скрываем splash screen (если есть)
+        const splash = document.getElementById('splash');
+        if (splash) {
+            splash.style.display = 'none';
+        }
+    });
 </script>
 </body>
 </html>
