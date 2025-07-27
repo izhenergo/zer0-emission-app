@@ -3,18 +3,17 @@ tg.expand();
 tg.enableClosingConfirmation();
 tg.ready();
 
-// Состояние приложения
 const AppState = {
-    views: {
-        MAIN: 'main',
-        GAMES_MENU: 'games',
-        GAME: 'game'
-    },
-    currentView: 'main',
-    currentGame: null
+    MAIN: 'main',
+    GAMES_MENU: 'games',
+    GAME: 'game'
 };
 
-// Получаем элементы
+const currentState = {
+    view: AppState.MAIN,
+    game: null
+};
+
 const elements = {
     splash: document.getElementById('splash'),
     app: document.getElementById('app'),
@@ -34,7 +33,6 @@ const elements = {
     }
 };
 
-// Конфигурация
 const Config = {
     games: {
         clumsyBird: 'https://izhenergo.github.io/Clumsy_Bird/',
@@ -43,19 +41,15 @@ const Config = {
     supportLink: 'https://t.me/Zer0_Emission_Support'
 };
 
-// Управление интерфейсом
 function showMainView() {
-    // Сбрасываем состояние
-    AppState.currentView = AppState.views.MAIN;
-    AppState.currentGame = null;
+    currentState.view = AppState.MAIN;
+    currentState.game = null;
 
-    // Настраиваем отображение
     elements.app.style.display = 'flex';
     elements.mainButtons.play.style.display = 'block';
     elements.mainButtons.support.style.display = 'block';
     elements.gamesMenu.style.display = 'none';
 
-    // Скрываем все игры
     Object.values(elements.frames).forEach(frame => {
         frame.style.display = 'none';
         frame.src = 'about:blank';
@@ -65,69 +59,60 @@ function showMainView() {
 }
 
 function showGamesMenu() {
-    AppState.currentView = AppState.views.GAMES_MENU;
+    currentState.view = AppState.GAMES_MENU;
     elements.mainButtons.play.style.display = 'none';
     elements.mainButtons.support.style.display = 'none';
     elements.gamesMenu.style.display = 'flex';
-    elements.app.style.display = 'flex';
+
     tg.BackButton.show();
+    tg.BackButton.onClick(() => {
+        showMainView();
+    });
 }
 
 function startGame(gameId) {
     if (!Config.games[gameId]) return;
 
-    AppState.currentView = AppState.views.GAME;
-    AppState.currentGame = gameId;
+    currentState.view = AppState.GAME;
+    currentState.game = gameId;
 
     elements.app.style.display = 'none';
     elements.frames[gameId].src = Config.games[gameId];
     elements.frames[gameId].style.display = 'block';
 
     tg.BackButton.show();
+    tg.BackButton.onClick(() => {
+        elements.frames[gameId].src = 'about:blank';
+        elements.frames[gameId].style.display = 'none';
+        elements.app.style.display = 'flex';
+        showGamesMenu();
+    });
 }
 
-function handleBackAction() {
-    switch(AppState.currentView) {
-        case AppState.views.GAME:
-            // Закрываем игру и возвращаемся в меню
-            elements.frames[AppState.currentGame].src = 'about:blank';
-            elements.frames[AppState.currentGame].style.display = 'none';
-            elements.app.style.display = 'flex';
-            showGamesMenu();
-            break;
-
-        case AppState.views.GAMES_MENU:
-            // Возвращаемся на главный экран
-            showMainView();
-            break;
-
-        default:
-            // На главном экране - ничего не делаем
-            break;
-    }
-}
-
-// Инициализация
 function initApp() {
-    // Скрываем splash screen
     setTimeout(() => {
         elements.splash.style.opacity = '0';
         elements.splash.style.pointerEvents = 'none';
         showMainView();
     }, 500);
 
-    // Настраиваем обработчики
+    // Обработчики кнопок
     elements.mainButtons.play.addEventListener('click', showGamesMenu);
     elements.mainButtons.support.addEventListener('click', () => {
         tg.openTelegramLink(Config.supportLink);
     });
 
-    elements.gameButtons.back.addEventListener('click', handleBackAction);
-    elements.gameButtons.clumsyBird.addEventListener('click', () => startGame('clumsyBird'));
-    elements.gameButtons.pacman.addEventListener('click', () => startGame('pacman'));
+    elements.gameButtons.back.addEventListener('click', () => {
+        showMainView();
+    });
 
-    // Обработчик системной кнопки "Назад"
-    tg.BackButton.onClick(handleBackAction);
+    elements.gameButtons.clumsyBird.addEventListener('click', () => {
+        startGame('clumsyBird');
+    });
+
+    elements.gameButtons.pacman.addEventListener('click', () => {
+        startGame('pacman');
+    });
 
     // iOS фиксы
     if (tg.platform === 'ios') {
@@ -136,5 +121,4 @@ function initApp() {
     }
 }
 
-// Запускаем приложение
 document.addEventListener('DOMContentLoaded', initApp);
