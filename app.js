@@ -69,6 +69,7 @@ function showGamesMenu() {
     elements.mainButtons.play.style.display = 'none';
     elements.mainButtons.support.style.display = 'none';
     elements.gamesMenu.style.display = 'flex';
+    elements.app.style.display = 'flex';
     tg.BackButton.show();
 }
 
@@ -91,7 +92,7 @@ function handleBackAction() {
             // Закрываем игру и возвращаемся в меню
             elements.frames[AppState.currentGame].src = 'about:blank';
             elements.frames[AppState.currentGame].style.display = 'none';
-            AppState.currentGame = null;
+            elements.app.style.display = 'flex';
             showGamesMenu();
             break;
 
