@@ -15,12 +15,12 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        body {
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
+        html, body {
+            width: 100%;
+            height: 100%;
+            overscroll-behavior-y: contain;
             position: fixed;
-            touch-action: none;
+            overflow: hidden;
             background: #000;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             color: white;
@@ -37,19 +37,13 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            transition: opacity 0.3s ease;
         }
 
         #splash img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            background: #000;
-        }
-
-        #splash.hidden {
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
         }
 
         #app {
@@ -59,12 +53,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: #000;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-        }
-
-        #app.visible {
-            display: flex;
         }
 
         .logo {
@@ -94,7 +83,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.1s ease, opacity 0.2s ease;
+            transition: transform 0.1s ease;
         }
 
         .btn:active {
@@ -168,15 +157,16 @@
         // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
         
-        // Включение полноэкранного режима
+        // Основные настройки WebApp
         tg.expand();
         tg.enableClosingConfirmation();
-        
+        tg.ready();
+
         // Состояние приложения
-        let currentView = 'main'; // 'main', 'games' или 'game'
+        let currentView = 'main';
         let currentGameFrame = null;
 
-        // Функция показа главного меню
+        // Функции навигации
         function showMainMenu() {
             currentView = 'main';
             document.getElementById('gamesMenu').style.display = 'none';
@@ -186,7 +176,6 @@
             tg.BackButton.hide();
         }
 
-        // Функция показа меню игр
         function showGamesMenu() {
             currentView = 'games';
             document.querySelectorAll('#app > button').forEach(btn => {
@@ -197,14 +186,13 @@
             tg.BackButton.onClick(showMainMenu);
         }
 
-        // Функция открытия игры
         function openGame(frameId) {
             currentView = 'game';
             currentGameFrame = frameId;
 
             const gameUrls = {
                 clumsyBirdFrame: 'https://izhenergo.github.io/Clumsy_Bird/',
-                pacmanFrame: 'https://izhenergo.github.io/Pacman_Canvas/',
+                pacmanFrame: 'https://izhenergo.github.io/Pacman_Canvas/'
             };
 
             document.getElementById('app').style.display = 'none';
@@ -216,7 +204,6 @@
             tg.BackButton.onClick(closeGame);
         }
 
-        // Функция закрытия игры
         function closeGame() {
             if (currentGameFrame) {
                 const frame = document.getElementById(currentGameFrame);
@@ -229,12 +216,25 @@
             showGamesMenu();
         }
 
-        // Инициализация при загрузке
+        // Обработка касаний (как у @surnin_nikitin)
+        let startY = 0;
+        document.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            const y = e.touches[0].clientY;
+            if (window.scrollY <= 0 && y > startY + 10) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Инициализация приложения
         document.addEventListener('DOMContentLoaded', () => {
-            // Скрытие splash screen через 1.5 секунды
             setTimeout(() => {
-                document.getElementById('splash').classList.add('hidden');
-                document.getElementById('app').classList.add('visible');
+                document.getElementById('splash').style.opacity = '0';
+                document.getElementById('splash').style.pointerEvents = 'none';
+                document.getElementById('app').style.display = 'flex';
                 showMainMenu();
             }, 1500);
 
@@ -243,22 +243,15 @@
             document.getElementById('supportBtn').addEventListener('click', () => {
                 tg.openTelegramLink('https://t.me/Zer0_Emission_Support');
             });
-            
-            // Обработчик кнопки "Назад" - теперь работает правильно
-            document.getElementById('backBtn').addEventListener('click', () => {
-                showMainMenu();
-                tg.BackButton.hide();
-            });
-
+            document.getElementById('backBtn').addEventListener('click', showMainMenu);
             document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
             document.getElementById('pacmanBtn').addEventListener('click', () => openGame('pacmanFrame'));
 
-            // Блокировка скролла
-            document.body.addEventListener('touchmove', (e) => {
-                if (currentView === 'main' || currentView === 'games') {
-                    e.preventDefault();
-                }
-            }, { passive: false });
+            // iOS фикс
+            if (tg.platform === 'ios') {
+                window.scrollTo(0, 0);
+                document.body.style.overflow = 'hidden';
+            }
         });
     </script>
 </body>
