@@ -1,1 +1,1 @@
-# zer0-emission-app
+# zero-emission-bot
