@@ -3,123 +3,113 @@ tg.expand();
 tg.enableClosingConfirmation();
 tg.ready();
 
-// Новая система навигации
-const navigation = {
-    currentScreen: null,
-
-    init() {
-        // Инициализация элементов
-        this.elements = {
-            splash: document.getElementById('splash'),
-            app: document.getElementById('app'),
-            gamesMenu: document.getElementById('gamesMenu'),
-            playBtn: document.getElementById('playBtn'),
-            supportBtn: document.getElementById('supportBtn'),
-            backBtn: document.getElementById('backBtn'),
-            clumsyBirdBtn: document.getElementById('clumsyBirdBtn'),
-            pacmanBtn: document.getElementById('pacmanBtn'),
-            clumsyBirdFrame: document.getElementById('clumsyBirdFrame'),
-            pacmanFrame: document.getElementById('pacmanFrame')
-        };
-
-        // Настройка обработчиков
-        this.setupHandlers();
-
-        // Запуск приложения
-        setTimeout(() => {
-            this.elements.splash.style.opacity = '0';
-            this.elements.splash.style.pointerEvents = 'none';
-            this.showMainMenu();
-        }, 500);
-    },
-
-    setupHandlers() {
-        // Основные кнопки
-        this.elements.playBtn.addEventListener('click', () => this.showGamesMenu());
-        this.elements.supportBtn.addEventListener('click', () => tg.openTelegramLink('https://t.me/Zer0_Emission_Support'));
-        this.elements.backBtn.addEventListener('click', () => this.handleBackButton());
-
-        // Кнопки игр
-        this.elements.clumsyBirdBtn.addEventListener('click', () => this.startGame('clumsyBird'));
-        this.elements.pacmanBtn.addEventListener('click', () => this.startGame('pacman'));
-
-        // Системная кнопка "Назад"
-        tg.BackButton.onClick(() => this.handleBackButton());
-    },
-
-    showMainMenu() {
-        this.currentScreen = 'main';
-        this.resetAllViews();
-
-        this.elements.app.style.display = 'flex';
-        this.elements.playBtn.style.display = 'block';
-        this.elements.supportBtn.style.display = 'block';
-
-        tg.BackButton.hide();
-    },
-
-    showGamesMenu() {
-        this.currentScreen = 'games';
-        this.resetAllViews();
-
-        this.elements.app.style.display = 'flex';
-        this.elements.gamesMenu.style.display = 'flex';
-
-        tg.BackButton.show();
-    },
-
-    startGame(game) {
-        this.currentScreen = game;
-        this.resetAllViews();
-
-        const frame = this.elements[`${game}Frame`];
-        frame.style.display = 'block';
-        frame.src = {
-            clumsyBird: 'https://izhenergo.github.io/Clumsy_Bird/',
-            pacman: 'https://izhenergo.github.io/Pacman_Canvas/'
-        }[game];
-
-        tg.BackButton.show();
-    },
-
-    handleBackButton() {
-        switch(this.currentScreen) {
-            case 'games':
-                this.showMainMenu();
-                break;
-
-            case 'clumsyBird':
-            case 'pacman':
-                const frame = this.elements[`${this.currentScreen}Frame`];
-                frame.src = 'about:blank';
-                this.showGamesMenu();
-                break;
-
-            default:
-                this.showMainMenu();
-        }
-    },
-
-    resetAllViews() {
-        // Сбрасываем все элементы в исходное состояние
-        this.elements.app.style.display = 'none';
-        this.elements.gamesMenu.style.display = 'none';
-        this.elements.clumsyBirdFrame.style.display = 'none';
-        this.elements.pacmanFrame.style.display = 'none';
-
-        // Скрываем все кнопки главного меню
-        this.elements.playBtn.style.display = 'none';
-        this.elements.supportBtn.style.display = 'none';
-    }
+// Упрощенная система управления состоянием
+const State = {
+    MAIN: 0,
+    GAMES_MENU: 1,
+    IN_GAME: 2
 };
 
-// Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', () => {
+let currentState = State.MAIN;
+let currentGame = null;
+
+// Инициализация элементов
+const elements = {
+    splash: document.getElementById('splash'),
+    app: document.getElementById('app'),
+    gamesMenu: document.getElementById('gamesMenu'),
+    playBtn: document.getElementById('playBtn'),
+    supportBtn: document.getElementById('supportBtn'),
+    backBtn: document.getElementById('backBtn'),
+    clumsyBirdBtn: document.getElementById('clumsyBirdBtn'),
+    pacmanBtn: document.getElementById('pacmanBtn'),
+    clumsyBirdFrame: document.getElementById('clumsyBirdFrame'),
+    pacmanFrame: document.getElementById('pacmanFrame')
+};
+
+// Обработчик системной кнопки "Назад"
+function handleSystemBack() {
+    switch(currentState) {
+        case State.GAMES_MENU:
+            showMainScreen();
+            break;
+        case State.IN_GAME:
+            exitGame();
+            break;
+        default:
+            tg.close();
+    }
+}
+
+// Показать главный экран
+function showMainScreen() {
+    currentState = State.MAIN;
+    elements.app.style.display = 'flex';
+    elements.gamesMenu.style.display = 'none';
+    elements.playBtn.style.display = 'block';
+    elements.supportBtn.style.display = 'block';
+    tg.BackButton.hide();
+}
+
+// Показать меню игр
+function showGamesMenu() {
+    currentState = State.GAMES_MENU;
+    elements.app.style.display = 'flex';
+    elements.gamesMenu.style.display = 'flex';
+    elements.playBtn.style.display = 'none';
+    elements.supportBtn.style.display = 'none';
+    tg.BackButton.show();
+    tg.BackButton.offClick(handleSystemBack);
+    tg.BackButton.onClick(handleSystemBack);
+}
+
+// Запуск игры
+function startGame(game) {
+    currentState = State.IN_GAME;
+    currentGame = game;
+
+    elements.app.style.display = 'none';
+    elements[`${game}Frame`].style.display = 'block';
+    elements[`${game}Frame`].src = {
+        clumsyBird: 'https://izhenergo.github.io/Clumsy_Bird/',
+        pacman: 'https://izhenergo.github.io/Pacman_Canvas/'
+    }[game];
+
+    tg.BackButton.show();
+    tg.BackButton.offClick(handleSystemBack);
+    tg.BackButton.onClick(handleSystemBack);
+}
+
+// Выход из игры
+function exitGame() {
+    elements[`${currentGame}Frame`].src = 'about:blank';
+    elements[`${currentGame}Frame`].style.display = 'none';
+    currentGame = null;
+    showGamesMenu();
+}
+
+// Инициализация приложения
+function initApp() {
+    // Скрываем splash screen
+    setTimeout(() => {
+        elements.splash.style.opacity = '0';
+        elements.splash.style.pointerEvents = 'none';
+        showMainScreen();
+    }, 500);
+
+    // Назначаем обработчики кнопок
+    elements.playBtn.addEventListener('click', showGamesMenu);
+    elements.supportBtn.addEventListener('click', () => tg.openTelegramLink('https://t.me/Zer0_Emission_Support'));
+    elements.backBtn.addEventListener('click', showMainScreen);
+    elements.clumsyBirdBtn.addEventListener('click', () => startGame('clumsyBird'));
+    elements.pacmanBtn.addEventListener('click', () => startGame('pacman'));
+
     // iOS фиксы
-    if (window.Telegram.WebApp.platform === 'ios') {
+    if (tg.platform === 'ios') {
         document.body.style.overflow = 'hidden';
         window.scrollTo(0, 0);
     }
+}
 
-    navigation.init();
-});
+// Запускаем приложение
+document.addEventListener('DOMContentLoaded', initApp);
