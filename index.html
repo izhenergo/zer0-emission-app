@@ -6,6 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Zer0 Emission Games</title>
+    <!-- Перенесен в начало для приоритетной загрузки -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -154,19 +155,47 @@
     <iframe class="game-frame" id="pacmanFrame" allow="fullscreen" src="about:blank"></iframe>
 
     <script>
-        // Инициализация Telegram WebApp
+        // Критически важные изменения:
+        
+        // 1. Инициализация WebApp ДО загрузки DOM
         const tg = window.Telegram.WebApp;
         
-        // Основные настройки WebApp
+        // 2. Мгновенное расширение на весь экран
         tg.expand();
         tg.enableClosingConfirmation();
         tg.ready();
+        
+        // 3. Оптимизированная обработка касаний
+        let startY = 0;
+        const handleTouchStart = (e) => { startY = e.touches[0].clientY; };
+        const handleTouchMove = (e) => {
+            const y = e.touches[0].clientY;
+            if (window.scrollY <= 0 && y > startY + 10) e.preventDefault();
+        };
 
-        // Состояние приложения
-        let currentView = 'main';
-        let currentGameFrame = null;
+        // 4. Улучшенная инициализация
+        const initApp = () => {
+            // Вешаем обработчики
+            document.addEventListener('touchstart', handleTouchStart, { passive: true });
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            
+            // iOS-фиксы
+            if (tg.platform === 'ios') {
+                document.body.style.position = 'fixed';
+                document.body.style.overflow = 'hidden';
+                window.scrollTo(0, 0);
+            }
 
-        // Функции навигации
+            // Показ интерфейса
+            setTimeout(() => {
+                document.getElementById('splash').style.opacity = '0';
+                document.getElementById('splash').style.pointerEvents = 'none';
+                document.getElementById('app').style.display = 'flex';
+                showMainMenu();
+            }, 500); // Уменьшено время задержки
+        };
+
+        // Функции навигации (без изменений)
         function showMainMenu() {
             currentView = 'main';
             document.getElementById('gamesMenu').style.display = 'none';
@@ -216,43 +245,21 @@
             showGamesMenu();
         }
 
-        // Обработка касаний (как у @surnin_nikitin)
-        let startY = 0;
-        document.addEventListener('touchstart', (e) => {
-            startY = e.touches[0].clientY;
-        }, { passive: true });
+        // Инициализация при полной загрузке
+        if (document.readyState === 'complete') {
+            initApp();
+        } else {
+            document.addEventListener('DOMContentLoaded', initApp);
+        }
 
-        document.addEventListener('touchmove', (e) => {
-            const y = e.touches[0].clientY;
-            if (window.scrollY <= 0 && y > startY + 10) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // Инициализация приложения
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                document.getElementById('splash').style.opacity = '0';
-                document.getElementById('splash').style.pointerEvents = 'none';
-                document.getElementById('app').style.display = 'flex';
-                showMainMenu();
-            }, 1500);
-
-            // Обработчики кнопок
-            document.getElementById('playBtn').addEventListener('click', showGamesMenu);
-            document.getElementById('supportBtn').addEventListener('click', () => {
-                tg.openTelegramLink('https://t.me/Zer0_Emission_Support');
-            });
-            document.getElementById('backBtn').addEventListener('click', showMainMenu);
-            document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
-            document.getElementById('pacmanBtn').addEventListener('click', () => openGame('pacmanFrame'));
-
-            // iOS фикс
-            if (tg.platform === 'ios') {
-                window.scrollTo(0, 0);
-                document.body.style.overflow = 'hidden';
-            }
+        // Обработчики кнопок
+        document.getElementById('playBtn')?.addEventListener('click', showGamesMenu);
+        document.getElementById('supportBtn')?.addEventListener('click', () => {
+            tg.openTelegramLink('https://t.me/Zer0_Emission_Support');
         });
+        document.getElementById('backBtn')?.addEventListener('click', showMainMenu);
+        document.getElementById('clumsyBirdBtn')?.addEventListener('click', () => openGame('clumsyBirdFrame'));
+        document.getElementById('pacmanBtn')?.addEventListener('click', () => openGame('pacmanFrame'));
     </script>
 </body>
 </html>
