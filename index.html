@@ -7,7 +7,123 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Zer0 Emission Games</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overscroll-behavior-y: contain;
+            position: fixed;
+            overflow: hidden;
+            background: #000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: white;
+        }
+
+        #splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        }
+
+        #app {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .logo {
+            width: 200px;
+            height: auto;
+            margin-bottom: 40px;
+        }
+
+        #gamesMenu {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 280px;
+            height: 56px;
+            margin: 12px 0;
+            border-radius: 16px;
+            border: none;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-play {
+            background: #EFEFEF;
+            color: #1a1a1a;
+        }
+
+        .btn-support {
+            background: #B7DB2A;
+            color: white;
+        }
+
+        .btn-game {
+            background: #B7DB2A;
+            color: white;
+        }
+
+        .btn-back {
+            background: #FF3B30;
+            color: white;
+            margin-top: 24px;
+        }
+
+        h2 {
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 28px;
+            text-align: center;
+        }
+
+        .game-frame {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+            background: #000;
+            z-index: 100;
+        }
+    </style>
 </head>
 <body>
 <div id="splash">
@@ -27,9 +143,121 @@
     </div>
 </div>
 
-<iframe class="game-frame" id="clumsyBirdFrame" allow="fullscreen" src="about:blank"></iframe>
-<iframe class="game-frame" id="pacmanFrame" allow="fullscreen" src="about:blank"></iframe>
+<iframe class="game-frame" id="clumsyBirdFrame" allow="fullscreen"></iframe>
+<iframe class="game-frame" id="pacmanFrame" allow="fullscreen"></iframe>
 
-<script src="app.js" type="module"></script>
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+
+    // Полностью отключаем системную кнопку "Назад"
+    tg.BackButton.hide();
+
+    const Views = {
+        MAIN: 'main',
+        GAMES: 'games',
+        GAME: 'game'
+    };
+
+    let currentView = Views.MAIN;
+    let currentGame = null;
+
+    const elements = {
+        splash: document.getElementById('splash'),
+        app: document.getElementById('app'),
+        gamesMenu: document.getElementById('gamesMenu'),
+        playBtn: document.getElementById('playBtn'),
+        supportBtn: document.getElementById('supportBtn'),
+        backBtn: document.getElementById('backBtn'),
+        clumsyBirdBtn: document.getElementById('clumsyBirdBtn'),
+        pacmanBtn: document.getElementById('pacmanBtn'),
+        clumsyBirdFrame: document.getElementById('clumsyBirdFrame'),
+        pacmanFrame: document.getElementById('pacmanFrame')
+    };
+
+    function showMainView() {
+        currentView = Views.MAIN;
+
+        // Скрываем всё
+        elements.gamesMenu.style.display = 'none';
+        elements.clumsyBirdFrame.style.display = 'none';
+        elements.pacmanFrame.style.display = 'none';
+
+        // Показываем главное меню
+        elements.app.style.display = 'flex';
+        elements.playBtn.style.display = 'block';
+        elements.supportBtn.style.display = 'block';
+    }
+
+    function showGamesMenu() {
+        currentView = Views.GAMES;
+
+        // Скрываем игры и главное меню
+        elements.clumsyBirdFrame.style.display = 'none';
+        elements.pacmanFrame.style.display = 'none';
+        elements.playBtn.style.display = 'none';
+        elements.supportBtn.style.display = 'none';
+
+        // Показываем меню игр
+        elements.app.style.display = 'flex';
+        elements.gamesMenu.style.display = 'flex';
+    }
+
+    function startGame(game) {
+        currentView = Views.GAME;
+        currentGame = game;
+
+        // Скрываем всё
+        elements.app.style.display = 'none';
+        elements.gamesMenu.style.display = 'none';
+
+        // Запускаем игру
+        const gameUrl = {
+            clumsyBird: 'https://izhenergo.github.io/Clumsy_Bird/',
+            pacman: 'https://izhenergo.github.io/Pacman_Canvas/'
+        }[game];
+
+        elements[`${game}Frame`].src = gameUrl;
+        elements[`${game}Frame`].style.display = 'block';
+    }
+
+    function exitGame() {
+        elements[`${currentGame}Frame`].src = 'about:blank';
+        showGamesMenu();
+    }
+
+    function initApp() {
+        // Скрываем splash screen
+        setTimeout(() => {
+            elements.splash.style.opacity = '0';
+            elements.splash.style.pointerEvents = 'none';
+            showMainView();
+        }, 500);
+
+        // Назначаем обработчики
+        elements.playBtn.addEventListener('click', showGamesMenu);
+        elements.supportBtn.addEventListener('click', () => {
+            tg.openTelegramLink('https://t.me/Zer0_Emission_Support');
+        });
+        elements.backBtn.addEventListener('click', () => {
+            if (currentView === Views.GAME) {
+                exitGame();
+            } else {
+                showMainView();
+            }
+        });
+        elements.clumsyBirdBtn.addEventListener('click', () => startGame('clumsyBird'));
+        elements.pacmanBtn.addEventListener('click', () => startGame('pacman'));
+
+        // iOS фиксы
+        if (tg.platform === 'ios') {
+            document.body.style.overflow = 'hidden';
+            window.scrollTo(0, 0);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+</script>
 </body>
 </html>
