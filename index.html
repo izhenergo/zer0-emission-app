@@ -1,37 +1,237 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Zer0 Emission Games</title>
-    <link rel="stylesheet" href="styles.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            touch-action: none;
+            background: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        #splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #splash img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #splash.hidden {
+            display: none;
+        }
+
+        #app {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        #app.visible {
+            display: flex;
+        }
+
+        .logo {
+            width: 200px;
+            height: auto;
+            margin-bottom: 40px;
+        }
+
+        #gamesMenu {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .btn {
+            width: 280px;
+            height: 56px;
+            margin: 12px 0;
+            border-radius: 16px;
+            border: none;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-play {
+            background: #EFEFEF;
+            color: #1a1a1a;
+        }
+
+        .btn-support {
+            background: #B7DB2A;
+            color: white;
+        }
+
+        .btn-game {
+            background: #B7DB2A;
+            color: white;
+        }
+
+        .btn-back {
+            background: #FF3B30;
+            color: white;
+            margin-top: 24px;
+        }
+
+        h2 {
+            color: #1a1a1a;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 28px;
+            text-align: center;
+        }
+
+        .game-frame {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 1001;
+            display: none;
+            background: #000;
+        }
+    </style>
 </head>
 <body>
 <div id="splash">
-    <img src="ZE_logo.png" alt="Zer0 Emission Logo">
+    <img alt="Splash Screen" src="ZM.png">
 </div>
 
 <div id="app">
-    <!-- Главный экран -->
-    <div id="mainScreen" class="screen">
-        <img src="ZE_logo.png" alt="Logo" class="logo">
-        <button id="playBtn" class="btn btn-primary">ИГРЫ</button>
-        <button id="supportBtn" class="btn btn-secondary">ПОДДЕРЖКА</button>
-    </div>
+    <img src="ZE_logo.png" alt="Zero Emission Logo" class="logo">
+    <button class="btn btn-support" id="supportBtn">Техническая поддержка</button>
+    <button class="btn btn-play" id="playBtn">Игры</button>
 
-    <!-- Меню игр -->
-    <div id="gamesScreen" class="screen">
-        <h2>ВЫБЕРИТЕ ИГРУшку</h2>
-        <button id="clumsyBirdBtn" class="btn btn-game">CLUMSY BIRD</button>
-        <button id="pacmanBtn" class="btn btn-game">PACMAN</button>
-        <button id="backBtn" class="btn btn-back">НАЗАД</button>
+    <div id="gamesMenu">
+        <h2>Выберите игрушку</h2>
+        <button class="btn btn-game" id="clumsyBirdBtn">Clumsy Bird</button>
+        <button class="btn btn-game" id="pacmanBtn">Pacman Canvas</button>
     </div>
 </div>
 
-<!-- Контейнеры для игр -->
-<iframe id="clumsyBirdFrame" class="game-frame"></iframe>
-<iframe id="pacmanFrame" class="game-frame"></iframe>
+<iframe class="game-frame" id="clumsyBirdFrame" allow="fullscreen" src="about:blank"></iframe>
+<iframe class="game-frame" id="pacmanFrame" allow="fullscreen" src="about:blank"></iframe>
 
-<script src="app.js"></script>
+<script>
+    const tg = window.Telegram.WebApp;
+    let currentView = 'main'; // 'main', 'games' или 'game'
+    let currentGameFrame = null;
+
+    // Инициализация WebApp
+    tg.ready();
+    tg.expand();
+    tg.enableClosingConfirmation();
+    tg.BackButton.hide();
+
+    function showMainMenu() {
+        currentView = 'main';
+        document.getElementById('app').style.display = 'flex';
+        document.getElementById('gamesMenu').style.display = 'none';
+        document.querySelectorAll('#app > button').forEach(btn => {
+            btn.style.display = 'block';
+        });
+        tg.BackButton.hide();
+    }
+
+    function showGamesMenu() {
+        currentView = 'games';
+        document.getElementById('app').style.display = 'flex';
+        document.querySelectorAll('#app > button').forEach(btn => {
+            btn.style.display = 'none';
+        });
+        document.getElementById('gamesMenu').style.display = 'flex';
+        tg.BackButton.show();
+        tg.BackButton.onClick(showMainMenu);
+    }
+
+    function openGame(frameId) {
+        currentView = 'game';
+        currentGameFrame = frameId;
+
+        const gameUrls = {
+            clumsyBirdFrame: 'https://izhenergo.github.io/Clumsy_Bird/',
+            pacmanFrame: 'https://izhenergo.github.io/Pacman_Canvas/',
+        };
+
+        document.getElementById('app').style.display = 'none';
+        const frame = document.getElementById(frameId);
+        frame.src = gameUrls[frameId];
+        frame.style.display = 'block';
+
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+            frame.src = 'about:blank';
+            frame.style.display = 'none';
+            showGamesMenu();
+        });
+    }
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            document.getElementById('splash').classList.add('hidden');
+            document.getElementById('app').classList.add('visible');
+            showMainMenu();
+        }, 1500);
+
+        // Назначение обработчиков
+        document.getElementById('playBtn').addEventListener('click', showGamesMenu);
+        document.getElementById('supportBtn').addEventListener('click', () => {
+            tg.openTelegramLink('https://t.me/MobileApps18');
+        });
+
+        document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
+        document.getElementById('pacmanBtn').addEventListener('click', () => openGame('pacmanFrame'));
+
+        // Блокировка скролла
+        document.body.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+    });
+</script>
 </body>
 </html>
