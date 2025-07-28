@@ -150,6 +150,7 @@
         <h2>Выберите игру (izhenergo)</h2>
         <button class="btn btn-game" id="clumsyBirdBtn">Clumsy Bird</button>
         <button class="btn btn-game" id="pacmanBtn">Pacman Canvas</button>
+        <button class="btn btn-back" id="backBtn">Назад</button>
     </div>
 </div>
 
@@ -223,6 +224,7 @@
         document.getElementById('supportBtn').addEventListener('click', () => {
             tg.openTelegramLink('https://t.me/MobileApps18');
         });
+        document.getElementById('backBtn').addEventListener('click', showMainMenu);
 
         document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
         document.getElementById('pacmanBtn').addEventListener('click', () => openGame('pacmanFrame'));
