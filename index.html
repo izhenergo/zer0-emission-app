@@ -12,6 +12,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -19,9 +20,9 @@
             height: 100vh;
             overflow: hidden;
             position: fixed;
-            touch-action: none;
             background: white;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            touch-action: pan-x pan-y; /* Разрешаем только вертикальный скролл */
         }
 
         #splash {
@@ -133,20 +134,7 @@
             z-index: 1001;
             display: none;
             background: #000;
-            touch-action: none;
-        }
-
-        .game-frame-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1001;
-            display: none;
-            background: #000;
-            overflow: hidden;
-            touch-action: none;
+            touch-action: none; /* Блокируем все жесты в iframe */
         }
     </style>
 </head>
@@ -168,12 +156,8 @@
     </div>
 </div>
 
-<div class="game-frame-container" id="clumsyBirdContainer">
-    <iframe class="game-frame" id="clumsyBirdFrame" allow="fullscreen" src="about:blank"></iframe>
-</div>
-<div class="game-frame-container" id="pacmanContainer">
-    <iframe class="game-frame" id="pacmanFrame" allow="fullscreen" src="about:blank"></iframe>
-</div>
+<iframe class="game-frame" id="clumsyBirdFrame" allow="fullscreen" src="about:blank"></iframe>
+<iframe class="game-frame" id="pacmanFrame" allow="fullscreen" src="about:blank"></iframe>
 
 <script>
     const tg = window.Telegram.WebApp;
@@ -217,13 +201,12 @@
         };
 
         document.getElementById('app').style.display = 'none';
-        const container = document.getElementById(frameId + 'Container');
         const frame = document.getElementById(frameId);
         frame.src = gameUrls[frameId];
-        container.style.display = 'block';
+        frame.style.display = 'block';
 
-        // Блокировка свайпа для закрытия
-        container.addEventListener('touchmove', preventSwipe, { passive: false });
+        // Блокируем свайп для закрытия
+        document.body.style.touchAction = 'none';
         
         tg.BackButton.show();
         tg.BackButton.onClick(() => {
@@ -232,16 +215,11 @@
     }
 
     function closeGame(frameId) {
-        const container = document.getElementById(frameId + 'Container');
         const frame = document.getElementById(frameId);
         frame.src = 'about:blank';
-        container.style.display = 'none';
-        container.removeEventListener('touchmove', preventSwipe);
+        frame.style.display = 'none';
+        document.body.style.touchAction = 'pan-x pan-y'; // Восстанавливаем скролл
         showGamesMenu();
-    }
-
-    function preventSwipe(e) {
-        e.preventDefault();
     }
 
     // Инициализация
@@ -261,13 +239,6 @@
 
         document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
         document.getElementById('pacmanBtn').addEventListener('click', () => openGame('pacmanFrame'));
-
-        // Блокировка скролла
-        document.body.addEventListener('touchmove', (e) => {
-            if (currentView !== 'game') {
-                e.preventDefault();
-            }
-        }, { passive: false });
     });
 </script>
 </body>
