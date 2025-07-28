@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Zer0 Emission Games</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -10,7 +12,6 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -18,6 +19,7 @@
             height: 100vh;
             overflow: hidden;
             position: fixed;
+            touch-action: none;
             background: white;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
@@ -42,9 +44,7 @@
         }
 
         #splash.hidden {
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
+            display: none;
         }
 
         #app {
@@ -55,7 +55,7 @@
             justify-content: center;
             align-items: center;
             background: white;
-            padding: 20px;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
         #app.visible {
@@ -76,8 +76,7 @@
         }
 
         .btn {
-            width: 100%;
-            max-width: 280px;
+            width: 280px;
             height: 56px;
             margin: 12px 0;
             border-radius: 16px;
@@ -124,21 +123,16 @@
             text-align: center;
         }
 
-        .game-container {
+        .game-frame {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            border: none;
             z-index: 1001;
             display: none;
             background: #000;
-        }
-
-        .game-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
         }
     </style>
 </head>
@@ -160,122 +154,86 @@
     </div>
 </div>
 
-<div class="game-container" id="clumsyBirdContainer">
-    <iframe allow="fullscreen"></iframe>
-</div>
-<div class="game-container" id="pacmanContainer">
-    <iframe allow="fullscreen"></iframe>
-</div>
+<iframe class="game-frame" id="clumsyBirdFrame" allow="fullscreen" src="about:blank"></iframe>
+<iframe class="game-frame" id="pacmanFrame" allow="fullscreen" src="about:blank"></iframe>
 
 <script>
     const tg = window.Telegram.WebApp;
+    let currentView = 'main'; // 'main', 'games' или 'game'
+    let currentGameFrame = null;
+
+    // Инициализация WebApp
     tg.ready();
     tg.expand();
+    tg.enableClosingConfirmation();
     tg.BackButton.hide();
 
-    const Views = {
-        MAIN: 'main',
-        GAMES: 'games',
-        GAME: 'game'
-    };
-
-    let currentView = Views.MAIN;
-    let currentGame = null;
-
-    const elements = {
-        splash: document.getElementById('splash'),
-        app: document.getElementById('app'),
-        mainScreen: document.getElementById('app'),
-        gamesMenu: document.getElementById('gamesMenu'),
-        playBtn: document.getElementById('playBtn'),
-        supportBtn: document.getElementById('supportBtn'),
-        backBtn: document.getElementById('backBtn'),
-        clumsyBirdBtn: document.getElementById('clumsyBirdBtn'),
-        pacmanBtn: document.getElementById('pacmanBtn'),
-        clumsyBirdContainer: document.getElementById('clumsyBirdContainer'),
-        pacmanContainer: document.getElementById('pacmanContainer')
-    };
-
-    // Блокировка свайпа
-    function blockSwipe(e) {
-        if (currentView === Views.GAME) {
-            e.preventDefault();
-        }
-    }
-
-    function showMainView() {
-        currentView = Views.MAIN;
-        elements.gamesMenu.style.display = 'none';
-        elements.playBtn.style.display = 'block';
-        elements.supportBtn.style.display = 'block';
+    function showMainMenu() {
+        currentView = 'main';
+        document.getElementById('app').style.display = 'flex';
+        document.getElementById('gamesMenu').style.display = 'none';
+        document.querySelectorAll('#app > button').forEach(btn => {
+            btn.style.display = 'block';
+        });
         tg.BackButton.hide();
     }
 
     function showGamesMenu() {
-        currentView = Views.GAMES;
-        elements.playBtn.style.display = 'none';
-        elements.supportBtn.style.display = 'none';
-        elements.gamesMenu.style.display = 'flex';
+        currentView = 'games';
+        document.getElementById('app').style.display = 'flex';
+        document.querySelectorAll('#app > button').forEach(btn => {
+            btn.style.display = 'none';
+        });
+        document.getElementById('gamesMenu').style.display = 'flex';
         tg.BackButton.show();
-        tg.BackButton.onClick(showMainView);
+        tg.BackButton.onClick(showMainMenu);
     }
 
-    function startGame(game) {
-        currentView = Views.GAME;
-        currentGame = game;
-        
-        const container = elements[`${game}Container`];
-        const iframe = container.querySelector('iframe');
-        
+    function openGame(frameId) {
+        currentView = 'game';
+        currentGameFrame = frameId;
+
         const gameUrls = {
-            clumsyBird: 'https://izhenergo.github.io/Clumsy_Bird/',
-            pacman: 'https://izhenergo.github.io/Pacman_Canvas/'
+            clumsyBirdFrame: 'https://izhenergo.github.io/Clumsy_Bird/',
+            pacmanFrame: 'https://izhenergo.github.io/Pacman_Canvas/',
         };
-        
-        iframe.src = gameUrls[game];
-        container.style.display = 'block';
-        
-        // Блокируем свайп
-        document.addEventListener('touchmove', blockSwipe, { passive: false });
-        
+
+        document.getElementById('app').style.display = 'none';
+        const frame = document.getElementById(frameId);
+        frame.src = gameUrls[frameId];
+        frame.style.display = 'block';
+
         tg.BackButton.show();
         tg.BackButton.onClick(() => {
-            exitGame();
+            frame.src = 'about:blank';
+            frame.style.display = 'none';
+            showGamesMenu();
         });
-    }
-
-    function exitGame() {
-        const container = elements[`${currentGame}Container`];
-        const iframe = container.querySelector('iframe');
-        
-        iframe.src = 'about:blank';
-        container.style.display = 'none';
-        
-        // Разблокируем свайп
-        document.removeEventListener('touchmove', blockSwipe);
-        
-        showGamesMenu();
     }
 
     // Инициализация
-    function initApp() {
+    document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
-            elements.splash.classList.add('hidden');
-            elements.app.classList.add('visible');
-            showMainView();
+            document.getElementById('splash').classList.add('hidden');
+            document.getElementById('app').classList.add('visible');
+            showMainMenu();
         }, 1500);
 
         // Назначение обработчиков
-        elements.playBtn.addEventListener('click', showGamesMenu);
-        elements.supportBtn.addEventListener('click', () => {
+        document.getElementById('playBtn').addEventListener('click', showGamesMenu);
+        document.getElementById('supportBtn').addEventListener('click', () => {
             tg.openTelegramLink('https://t.me/MobileApps18');
         });
-        elements.backBtn.addEventListener('click', showMainView);
-        elements.clumsyBirdBtn.addEventListener('click', () => startGame('clumsyBird'));
-        elements.pacmanBtn.addEventListener('click', () => startGame('pacman'));
-    }
+        document.getElementById('backBtn').addEventListener('click', showMainMenu);
 
-    document.addEventListener('DOMContentLoaded', initApp);
+        document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
+        document.getElementById('pacmanBtn').addEventListener('click', () => openGame('pacmanFrame'));
+
+        // Блокировка скролла
+        document.body.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+    });
 </script>
 </body>
 </html>
