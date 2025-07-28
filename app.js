@@ -17,7 +17,8 @@ let currentGame = null;
 const elements = {
     splash: document.getElementById('splash'),
     app: document.getElementById('app'),
-    gamesMenu: document.getElementById('gamesMenu'),
+    mainScreen: document.getElementById('mainScreen'),
+    gamesScreen: document.getElementById('gamesScreen'),
     playBtn: document.getElementById('playBtn'),
     supportBtn: document.getElementById('supportBtn'),
     backBtn: document.getElementById('backBtn'),
@@ -29,41 +30,27 @@ const elements = {
 
 function showMainView() {
     currentView = Views.MAIN;
-
-    // Скрываем всё
-    elements.gamesMenu.style.display = 'none';
+    elements.mainScreen.style.display = 'flex';
+    elements.gamesScreen.style.display = 'none';
     elements.clumsyBirdFrame.style.display = 'none';
     elements.pacmanFrame.style.display = 'none';
-
-    // Показываем главное меню
-    elements.app.style.display = 'flex';
-    elements.playBtn.style.display = 'block';
-    elements.supportBtn.style.display = 'block';
 }
 
 function showGamesMenu() {
     currentView = Views.GAMES;
-
-    // Скрываем игры и главное меню
+    elements.mainScreen.style.display = 'none';
+    elements.gamesScreen.style.display = 'flex';
     elements.clumsyBirdFrame.style.display = 'none';
     elements.pacmanFrame.style.display = 'none';
-    elements.playBtn.style.display = 'none';
-    elements.supportBtn.style.display = 'none';
-
-    // Показываем меню игр
-    elements.app.style.display = 'flex';
-    elements.gamesMenu.style.display = 'flex';
 }
 
 function startGame(game) {
     currentView = Views.GAME;
     currentGame = game;
 
-    // Скрываем всё
     elements.app.style.display = 'none';
-    elements.gamesMenu.style.display = 'none';
+    elements.gamesScreen.style.display = 'none';
 
-    // Запускаем игру
     const gameUrl = {
         clumsyBird: 'https://izhenergo.github.io/Clumsy_Bird/',
         pacman: 'https://izhenergo.github.io/Pacman_Canvas/'
@@ -83,6 +70,7 @@ function initApp() {
     setTimeout(() => {
         elements.splash.style.opacity = '0';
         elements.splash.style.pointerEvents = 'none';
+        elements.app.style.display = 'flex';
         showMainView();
     }, 500);
 
@@ -91,13 +79,7 @@ function initApp() {
     elements.supportBtn.addEventListener('click', () => {
         tg.openTelegramLink('https://t.me/Zer0_Emission_Support');
     });
-    elements.backBtn.addEventListener('click', () => {
-        if (currentView === Views.GAME) {
-            exitGame();
-        } else {
-            showMainView();
-        }
-    });
+    elements.backBtn.addEventListener('click', showMainView);
     elements.clumsyBirdBtn.addEventListener('click', () => startGame('clumsyBird'));
     elements.pacmanBtn.addEventListener('click', () => startGame('pacman'));
 

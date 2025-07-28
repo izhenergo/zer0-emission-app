@@ -4,84 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zer0 Emission Games</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-            background: #000;
-            color: white;
-        }
-
-        #app {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .screen {
-            display: none;
-            width: 100%;
-            height: 100%;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        #mainScreen {
-            display: flex;
-        }
-
-        .logo {
-            width: 150px;
-            margin-bottom: 30px;
-        }
-
-        .btn {
-            width: 90%;
-            max-width: 300px;
-            padding: 15px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .btn-primary {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #2196F3;
-            color: white;
-        }
-
-        .btn-danger {
-            background: #f44336;
-            color: white;
-        }
-
-        .game-container {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div id="splash">
+    <img src="ZE_logo.png" alt="Zer0 Emission Logo">
+</div>
+
 <div id="app">
     <!-- Главный экран -->
     <div id="mainScreen" class="screen">
@@ -93,86 +22,16 @@
     <!-- Меню игр -->
     <div id="gamesScreen" class="screen">
         <h2>ВЫБЕРИТЕ ИГРУ</h2>
-        <button id="clumsyBirdBtn" class="btn btn-primary">CLUMSY BIRD</button>
-        <button id="pacmanBtn" class="btn btn-primary">PACMAN</button>
-        <button id="backBtn" class="btn btn-danger">НАЗАД</button>
+        <button id="clumsyBirdBtn" class="btn btn-game">CLUMSY BIRD</button>
+        <button id="pacmanBtn" class="btn btn-game">PACMAN</button>
+        <button id="backBtn" class="btn btn-back">НАЗАД</button>
     </div>
 </div>
 
 <!-- Контейнеры для игр -->
-<div id="clumsyBirdContainer" class="game-container"></div>
-<div id="pacmanContainer" class="game-container"></div>
+<iframe id="clumsyBirdFrame" class="game-frame"></iframe>
+<iframe id="pacmanFrame" class="game-frame"></iframe>
 
-<script>
-    // Полностью изолированная система навигации
-    class GameApp {
-        constructor() {
-            this.screens = {
-                main: document.getElementById('mainScreen'),
-                games: document.getElementById('gamesScreen')
-            };
-
-            this.containers = {
-                clumsyBird: document.getElementById('clumsyBirdContainer'),
-                pacman: document.getElementById('pacmanContainer')
-            };
-
-            this.initButtons();
-            this.showScreen('main');
-        }
-
-        initButtons() {
-            document.getElementById('playBtn').onclick = () => this.showScreen('games');
-            document.getElementById('supportBtn').onclick = () => window.open('https://t.me/Zer0_Emission_Support', '_blank');
-            document.getElementById('backBtn').onclick = () => this.showScreen('main');
-
-            document.getElementById('clumsyBirdBtn').onclick = () => this.startGame('clumsyBird');
-            document.getElementById('pacmanBtn').onclick = () => this.startGame('pacman');
-        }
-
-        showScreen(screen) {
-            // Скрыть всё
-            Object.values(this.screens).forEach(s => s.style.display = 'none');
-            Object.values(this.containers).forEach(c => {
-                c.style.display = 'none';
-                c.innerHTML = '';
-            });
-
-            // Показать нужный экран
-            if (this.screens[screen]) {
-                this.screens[screen].style.display = 'flex';
-            }
-        }
-
-        startGame(game) {
-            this.showScreen('');
-
-            const gameUrl = {
-                clumsyBird: 'https://izhenergo.github.io/Clumsy_Bird/',
-                pacman: 'https://izhenergo.github.io/Pacman_Canvas/'
-            }[game];
-
-            const iframe = document.createElement('iframe');
-            iframe.style.width = '100%';
-            iframe.style.height = '100%';
-            iframe.style.border = 'none';
-            iframe.src = gameUrl;
-
-            this.containers[game].appendChild(iframe);
-            this.containers[game].style.display = 'block';
-        }
-    }
-
-    // Инициализация приложения
-    document.addEventListener('DOMContentLoaded', () => {
-        new GameApp();
-
-        // Скрываем splash screen (если есть)
-        const splash = document.getElementById('splash');
-        if (splash) {
-            splash.style.display = 'none';
-        }
-    });
-</script>
+<script src="app.js"></script>
 </body>
 </html>
