@@ -199,6 +199,8 @@
         });
         document.getElementById('gamesMenu').style.display = 'flex';
         tg.BackButton.show();
+        // Устанавливаем правильный обработчик для кнопки "Назад"
+        tg.BackButton.offClick(showMainMenu); // Сначала удаляем старый обработчик
         tg.BackButton.onClick(showMainMenu);
     }
 
@@ -217,11 +219,16 @@
         frame.style.display = 'block';
 
         tg.BackButton.show();
-        tg.BackButton.onClick(() => {
-            frame.src = 'about:blank';
-            frame.style.display = 'none';
-            showGamesMenu();
-        });
+        // Устанавливаем правильный обработчик для кнопки "Назад" из игры
+        tg.BackButton.offClick(closeGame); // Сначала удаляем старый обработчик
+        tg.BackButton.onClick(closeGame);
+    }
+
+    function closeGame() {
+        const frame = document.getElementById(currentGameFrame);
+        frame.src = 'about:blank';
+        frame.style.display = 'none';
+        showGamesMenu();
     }
 
     // Инициализация
