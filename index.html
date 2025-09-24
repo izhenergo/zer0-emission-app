@@ -81,7 +81,7 @@
             margin-bottom: 40px;
         }
 
-        #gamesMenu {
+        #gamesMenu, #appStoreMenu {
             display: none;
             flex-direction: column;
             align-items: center;
@@ -112,6 +112,11 @@
             color: #1a1a1a;
         }
 
+        .btn-app {
+            background: #EFEFEF;
+            color: #1a1a1a;
+        }
+
         .btn-support {
             background: #B7DB2A;
             color: white;
@@ -120,6 +125,66 @@
         .btn-game {
             background: #B7DB2A;
             color: white;
+        }
+
+        .btn-store {
+            width: 280px;
+            height: 64px;
+            margin: 8px 0;
+            border-radius: 16px;
+            border: 2px solid #E5E5EA;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0 20px;
+            transition: all 0.2s ease;
+            background: white;
+            color: #1a1a1a;
+        }
+
+        .btn-store:active {
+            transform: scale(0.96);
+            background: #F7F7F7;
+        }
+
+        .btn-store:hover {
+            border-color: #007AFF;
+        }
+
+        .store-icon {
+            width: 32px;
+            height: 32px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .store-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .store-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .store-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .store-subtitle {
+            font-size: 13px;
+            color: #8E8E93;
+            margin-top: 2px;
         }
 
         .btn-back {
@@ -132,7 +197,7 @@
             color: #1a1a1a;
             font-size: 22px;
             font-weight: 700;
-            margin-bottom: 28px;
+            margin-bottom: 20px;
             text-align: center;
         }
 
@@ -158,12 +223,36 @@
     <img src="ZE_logo.png" alt="Zero Emission Logo" class="logo">
     <button class="btn btn-support" id="supportBtn">Техническая поддержка</button>
     <button class="btn btn-play" id="playBtn">Игры</button>
+    <button class="btn btn-app" id="appBtn">Мобильное приложение</button>
 
     <div id="gamesMenu">
         <h2>Выберите игру</h2>
         <button class="btn btn-game" id="clumsyBirdBtn">Clumsy Bird</button>
         <button class="btn btn-game" id="pacmanBtn">Pacman Canvas</button>
         <button class="btn btn-back" id="backBtn">Назад</button>
+    </div>
+
+    <div id="appStoreMenu">
+        <h2>Скачать приложение</h2>
+        <button class="btn-store" id="appStoreBtn">
+            <span class="store-icon">
+                <img src="AppStore.svg" alt="App Store">
+            </span>
+            <div class="store-text">
+                <span class="store-title">App Store</span>
+                <span class="store-subtitle">Для iOS устройств</span>
+            </div>
+        </button>
+        <button class="btn-store" id="googlePlayBtn">
+            <span class="store-icon">
+                <img src="GooglePlay.svg" alt="Google Play">
+            </span>
+            <div class="store-text">
+                <span class="store-title">Google Play</span>
+                <span class="store-subtitle">Для Android устройств</span>
+            </div>
+        </button>
+        <button class="btn btn-back" id="backFromStoreBtn">Назад</button>
     </div>
 </div>
 
@@ -172,7 +261,7 @@
 
 <script>
     const tg = window.Telegram.WebApp;
-    let currentView = 'main'; // 'main', 'games' или 'game'
+    let currentView = 'main'; // 'main', 'games', 'appstore' или 'game'
     let currentGameFrame = null;
 
     // Инициализация WebApp
@@ -185,6 +274,7 @@
         currentView = 'main';
         document.getElementById('app').style.display = 'flex';
         document.getElementById('gamesMenu').style.display = 'none';
+        document.getElementById('appStoreMenu').style.display = 'none';
         document.querySelectorAll('#app > button').forEach(btn => {
             btn.style.display = 'block';
         });
@@ -198,9 +288,22 @@
             btn.style.display = 'none';
         });
         document.getElementById('gamesMenu').style.display = 'flex';
+        document.getElementById('appStoreMenu').style.display = 'none';
         tg.BackButton.show();
-        // Устанавливаем правильный обработчик для кнопки "Назад"
-        tg.BackButton.offClick(showMainMenu); // Сначала удаляем старый обработчик
+        tg.BackButton.offClick(showMainMenu);
+        tg.BackButton.onClick(showMainMenu);
+    }
+
+    function showAppStoreMenu() {
+        currentView = 'appstore';
+        document.getElementById('app').style.display = 'flex';
+        document.querySelectorAll('#app > button').forEach(btn => {
+            btn.style.display = 'none';
+        });
+        document.getElementById('gamesMenu').style.display = 'none';
+        document.getElementById('appStoreMenu').style.display = 'flex';
+        tg.BackButton.show();
+        tg.BackButton.offClick(showMainMenu);
         tg.BackButton.onClick(showMainMenu);
     }
 
@@ -219,8 +322,7 @@
         frame.style.display = 'block';
 
         tg.BackButton.show();
-        // Устанавливаем правильный обработчик для кнопки "Назад" из игры
-        tg.BackButton.offClick(closeGame); // Сначала удаляем старый обработчик
+        tg.BackButton.offClick(closeGame);
         tg.BackButton.onClick(closeGame);
     }
 
@@ -241,13 +343,26 @@
 
         // Назначение обработчиков
         document.getElementById('playBtn').addEventListener('click', showGamesMenu);
+        document.getElementById('appBtn').addEventListener('click', showAppStoreMenu);
         document.getElementById('supportBtn').addEventListener('click', () => {
             tg.openTelegramLink('https://t.me/Zer0_Emission_Support');
         });
         document.getElementById('backBtn').addEventListener('click', showMainMenu);
+        document.getElementById('backFromStoreBtn').addEventListener('click', showMainMenu);
 
         document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
         document.getElementById('pacmanBtn').addEventListener('click', () => openGame('pacmanFrame'));
+
+        const APP_STORE_URL = 'https://apps.apple.com/ru/app/zero-emission/id1632884066';
+        const GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=ru.zero.emission.app';
+
+        document.getElementById('appStoreBtn').addEventListener('click', () => {
+            tg.openLink(APP_STORE_URL);
+        });
+
+        document.getElementById('googlePlayBtn').addEventListener('click', () => {
+            tg.openLink(GOOGLE_PLAY_URL);
+        });
 
         // Блокировка скролла
         document.body.addEventListener('touchmove', (e) => {
