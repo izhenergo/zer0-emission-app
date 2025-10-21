@@ -228,6 +228,7 @@
             margin-bottom: 20px;
             flex: 1;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .faq-item {
@@ -482,8 +483,12 @@
             });
         });
 
-        // Блокировка скролла
+        // Блокировка скролла только для body, но разрешаем для контейнеров с контентом
         document.body.addEventListener('touchmove', (e) => {
+            // Разрешаем скролл только для элементов с overflow
+            if (e.target.closest('.faq-container') || e.target.closest('#gamesMenu') || e.target.closest('#appStoreMenu') || e.target.closest('#faqMenu')) {
+                return;
+            }
             e.preventDefault();
         }, { passive: false });
     });
