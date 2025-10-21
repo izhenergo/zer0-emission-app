@@ -81,11 +81,14 @@
             margin-bottom: 40px;
         }
 
-        #gamesMenu, #appStoreMenu {
+        #gamesMenu, #appStoreMenu, #faqMenu {
             display: none;
             flex-direction: column;
             align-items: center;
             width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 0 20px;
         }
 
         .btn {
@@ -113,6 +116,11 @@
         }
 
         .btn-app {
+            background: #EFEFEF;
+            color: #1a1a1a;
+        }
+
+        .btn-faq {
             background: #EFEFEF;
             color: #1a1a1a;
         }
@@ -191,6 +199,7 @@
             background: #FF3B30;
             color: white;
             margin-top: 24px;
+            flex-shrink: 0;
         }
 
         h2 {
@@ -212,6 +221,58 @@
             display: none;
             background: #000;
         }
+
+        .faq-container {
+            width: 100%;
+            max-width: 320px;
+            margin-bottom: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .faq-item {
+            margin-bottom: 16px;
+            border-radius: 12px;
+            background: #F7F7F7;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 20px;
+            font-weight: 400;
+            color: #8E8E93;
+        }
+
+        .faq-answer {
+            padding: 0 16px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #666;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 0 16px 16px;
+            max-height: 500px;
+        }
+
+        .faq-item.active .faq-question::after {
+            content: '-';
+        }
     </style>
 </head>
 <body>
@@ -224,6 +285,7 @@
     <button class="btn btn-support" id="supportBtn">Техническая поддержка</button>
     <button class="btn btn-play" id="playBtn">Игры</button>
     <button class="btn btn-app" id="appBtn">Мобильное приложение</button>
+    <button class="btn btn-faq" id="faqBtn">Частые вопросы</button>
 
     <div id="gamesMenu">
         <h2>Выберите игру</h2>
@@ -254,6 +316,35 @@
         </button>
         <button class="btn btn-back" id="backFromStoreBtn">Назад</button>
     </div>
+
+    <div id="faqMenu">
+        <h2>Частые вопросы</h2>
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question">Как запустить зарядную сессию?</div>
+                <div class="faq-answer">Для запуска зарядной сессии необходимо выбрать нужную станцию и коннектор в приложении, установить необходимый объем электроэнергии для зарядки, выбрать способ оплаты, после чего вставить коннектор в электромобиль, дождавшись команды в приложении и, на некоторых станциях, звукового сигнала от станции.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Как оплатить зарядную сессию?</div>
+                <div class="faq-answer">Для начала необходимо привязать вашу банковскую карту в приложении, далее с нее будет автоматически списываться необходимая сумма для оплаты зарядной сессии. Тариф за услуги указан при выборе зарядной станции в приложении.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">С какой мощностью будет заряжаться электромобиль?</div>
+                <div class="faq-answer">Это зависит от многих факторов, в том числе от уровня заряда автомобиля, температуры, загруженности станции. Максимально возможная мощность отдачи заряда указана в нашем приложении при выборе станции.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Зачем нужна "Красная кнопка" на зарядной станции?</div>
+                <div class="faq-answer">На станциях с разъемом CHAdeMO и некоторых станциях переменного тока в соответствии с требованиями к безопасности есть кнопка аварийной остановки станции. Так как кнопка переводит станцию в аварийный режим и делает её недоступной для использования, настоятельная просьба использовать её только в аварийных ситуациях или по указанию службы поддержки, а после использования отжимать кнопку обратно, чтобы другие электромобилисты могли воспользоваться станцией.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Что делать в случае чрезвычайной ситуации?</div>
+                <div class="faq-answer">В случае возгорания ЭЗС или появления дыма из неё во время зарядной сессии, необходимо по возможности нажать кнопку аварийной остановки на ЭЗС или остановить зарядку через мобильное приложение или из машины, после чего отключить зарядный кабель, отогнать машину и вызвать пожарную службу. После этого обязательно сообщите о произошедшем в нашу службу технической поддержки!<br><br>
+                    В случае возникновения короткого замыкания на разъёме необходимо нажать кнопку аварийной остановки на ЭЗС или остановить зарядку через мобильное приложение, убедиться на приборной панели электромобиля и экране зарядной станции, что зарядка прекратилась, только после отсоединить кабель и связаться со службой поддержки. Обязательно выполните фото-видео-фиксацию последствий инцидента и дождитесь прибытия нашего сотрудника для установления причин инцидента и получения компенсации в случае вины зарядной станции.<br><br>
+                    В случае задымления или возгорания автомобиля или разъёма во время зарядной сессии необходимо покинуть автомобиль, нажать кнопку аварийной остановки на ЭЗС или остановить зарядку через мобильное приложение или из машины, после чего отключить зарядный кабель, отогнать машину и вызвать пожарную службу. После этого обязательно сообщите о произошедшем в нашу службу технической поддержки.</div>
+            </div>
+        </div>
+        <button class="btn btn-back" id="backFromFaqBtn">Назад</button>
+    </div>
 </div>
 
 <iframe class="game-frame" id="clumsyBirdFrame" allow="fullscreen" src="about:blank"></iframe>
@@ -261,7 +352,7 @@
 
 <script>
     const tg = window.Telegram.WebApp;
-    let currentView = 'main'; // 'main', 'games', 'appstore' или 'game'
+    let currentView = 'main'; // 'main', 'games', 'appstore', 'faq' или 'game'
     let currentGameFrame = null;
 
     // Инициализация WebApp
@@ -275,6 +366,7 @@
         document.getElementById('app').style.display = 'flex';
         document.getElementById('gamesMenu').style.display = 'none';
         document.getElementById('appStoreMenu').style.display = 'none';
+        document.getElementById('faqMenu').style.display = 'none';
         document.querySelectorAll('#app > button').forEach(btn => {
             btn.style.display = 'block';
         });
@@ -289,6 +381,7 @@
         });
         document.getElementById('gamesMenu').style.display = 'flex';
         document.getElementById('appStoreMenu').style.display = 'none';
+        document.getElementById('faqMenu').style.display = 'none';
         tg.BackButton.show();
         tg.BackButton.offClick(showMainMenu);
         tg.BackButton.onClick(showMainMenu);
@@ -302,6 +395,21 @@
         });
         document.getElementById('gamesMenu').style.display = 'none';
         document.getElementById('appStoreMenu').style.display = 'flex';
+        document.getElementById('faqMenu').style.display = 'none';
+        tg.BackButton.show();
+        tg.BackButton.offClick(showMainMenu);
+        tg.BackButton.onClick(showMainMenu);
+    }
+
+    function showFaqMenu() {
+        currentView = 'faq';
+        document.getElementById('app').style.display = 'flex';
+        document.querySelectorAll('#app > button').forEach(btn => {
+            btn.style.display = 'none';
+        });
+        document.getElementById('gamesMenu').style.display = 'none';
+        document.getElementById('appStoreMenu').style.display = 'none';
+        document.getElementById('faqMenu').style.display = 'flex';
         tg.BackButton.show();
         tg.BackButton.offClick(showMainMenu);
         tg.BackButton.onClick(showMainMenu);
@@ -344,11 +452,13 @@
         // Назначение обработчиков
         document.getElementById('playBtn').addEventListener('click', showGamesMenu);
         document.getElementById('appBtn').addEventListener('click', showAppStoreMenu);
+        document.getElementById('faqBtn').addEventListener('click', showFaqMenu);
         document.getElementById('supportBtn').addEventListener('click', () => {
             tg.openTelegramLink('https://t.me/Zer0_Emission_Support');
         });
         document.getElementById('backBtn').addEventListener('click', showMainMenu);
         document.getElementById('backFromStoreBtn').addEventListener('click', showMainMenu);
+        document.getElementById('backFromFaqBtn').addEventListener('click', showMainMenu);
 
         document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
         document.getElementById('pacmanBtn').addEventListener('click', () => openGame('pacmanFrame'));
@@ -362,6 +472,14 @@
 
         document.getElementById('googlePlayBtn').addEventListener('click', () => {
             tg.openLink(GOOGLE_PLAY_URL);
+        });
+
+        // Обработчики для FAQ
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const item = question.parentElement;
+                item.classList.toggle('active');
+            });
         });
 
         // Блокировка скролла
