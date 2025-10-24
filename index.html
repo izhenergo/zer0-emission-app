@@ -224,7 +224,7 @@
             text-align: center;
         }
 
-        .game-frame {
+        .game-frame, .terms-frame {
             position: fixed;
             top: 0;
             left: 0;
@@ -233,7 +233,11 @@
             border: none;
             z-index: 1001;
             display: none;
-            background: #000;
+            background: white;
+        }
+
+        .terms-frame {
+            z-index: 1002;
         }
 
         .faq-container {
@@ -389,10 +393,11 @@
 
 <iframe class="game-frame" id="clumsyBirdFrame" allow="fullscreen" src="about:blank"></iframe>
 <iframe class="game-frame" id="pacmanFrame" allow="fullscreen" src="about:blank"></iframe>
+<iframe class="terms-frame" id="termsFrame" src="about:blank"></iframe>
 
 <script>
     const tg = window.Telegram.WebApp;
-    let currentView = 'main'; // 'main', 'games', 'appstore', 'about', 'faq', 'feedback' или 'game'
+    let currentView = 'main'; // 'main', 'games', 'appstore', 'about', 'faq', 'feedback', 'terms' или 'game'
     let currentGameFrame = null;
 
     // Инициализация WebApp
@@ -495,6 +500,25 @@
         tg.BackButton.onClick(showAboutMenu);
     }
 
+    function showTerms() {
+        currentView = 'terms';
+        document.getElementById('app').style.display = 'none';
+        const frame = document.getElementById('termsFrame');
+        frame.src = 'http://zero-emission.ru/terms-of-use/';
+        frame.style.display = 'block';
+
+        tg.BackButton.show();
+        tg.BackButton.offClick(closeTerms);
+        tg.BackButton.onClick(closeTerms);
+    }
+
+    function closeTerms() {
+        const frame = document.getElementById('termsFrame');
+        frame.src = 'about:blank';
+        frame.style.display = 'none';
+        showAboutMenu();
+    }
+
     function openGame(frameId) {
         currentView = 'game';
         currentGameFrame = frameId;
@@ -562,14 +586,7 @@
 
         // Обработчики меню "О приложении"
         document.getElementById('faqFromAboutBtn').addEventListener('click', showFaqMenu);
-        document.getElementById('termsBtn').addEventListener('click', () => {
-            // Временная заглушка для пользовательского соглашения
-            tg.showPopup({
-                title: 'Пользовательское соглашение',
-                message: 'Функция находится в разработке',
-                buttons: [{ type: 'ok' }]
-            });
-        });
+        document.getElementById('termsBtn').addEventListener('click', showTerms);
         document.getElementById('feedbackBtn').addEventListener('click', showFeedbackMenu);
 
         // Обработчики для FAQ
@@ -586,7 +603,7 @@
             if (e.target.closest('.faq-container') || e.target.closest('.feedback-container') ||
                 e.target.closest('#gamesMenu') || e.target.closest('#appStoreMenu') ||
                 e.target.closest('#aboutMenu') || e.target.closest('#faqMenu') ||
-                e.target.closest('#feedbackMenu')) {
+                e.target.closest('#feedbackMenu') || e.target.closest('.terms-frame')) {
                 return;
             }
             e.preventDefault();
