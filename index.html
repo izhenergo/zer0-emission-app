@@ -81,7 +81,7 @@
             margin-bottom: 40px;
         }
 
-        #gamesMenu, #appStoreMenu, #aboutMenu, #feedbackMenu {
+        #gamesMenu, #appStoreMenu, #aboutMenu, #feedbackMenu, #termsMenu {
             display: none;
             flex-direction: column;
             align-items: center;
@@ -224,7 +224,7 @@
             text-align: center;
         }
 
-        .game-frame, .terms-frame {
+        .game-frame {
             position: fixed;
             top: 0;
             left: 0;
@@ -233,20 +233,16 @@
             border: none;
             z-index: 1001;
             display: none;
-            background: white;
+            background: #000;
         }
 
-        .terms-frame {
-            z-index: 1002;
-        }
-
-        .faq-container {
+        .faq-container, .terms-container {
             width: 100%;
             max-width: 320px;
+            margin-bottom: 20px;
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            margin-bottom: 20px;
         }
 
         .feedback-container {
@@ -256,6 +252,40 @@
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+        }
+
+        .terms-content {
+            padding: 16px;
+            background: #F7F7F7;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+            text-align: left;
+        }
+
+        .terms-content h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 16px 0 8px 0;
+            color: #1a1a1a;
+        }
+
+        .terms-content h3:first-child {
+            margin-top: 0;
+        }
+
+        .terms-content p {
+            margin-bottom: 12px;
+        }
+
+        .terms-content ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .terms-content li {
+            margin-bottom: 6px;
         }
 
         .faq-item {
@@ -389,11 +419,54 @@
         </div>
         <button class="btn btn-back" id="backFromFeedbackBtn">Назад</button>
     </div>
+
+    <div id="termsMenu">
+        <h2>Пользовательское соглашение</h2>
+        <div class="terms-container">
+            <div class="terms-content">
+                <h3>Общие положения</h3>
+                <p>Настоящее Пользовательское соглашение (далее — «Соглашение») регулирует отношения между владельцем приложения Zer0 Emission (далее — «Сервис») и физическим лицом (далее — «Пользователь»), использующим мобильное приложение и услуги зарядных станций.</p>
+
+                <h3>Условия использования</h3>
+                <p>Пользователь соглашается:</p>
+                <ul>
+                    <li>Использовать Сервис только в законных целях</li>
+                    <li>Обеспечивать достоверность предоставляемой информации</li>
+                    <li>Соблюдать правила эксплуатации зарядного оборудования</li>
+                    <li>Нести ответственность за действия, совершенные с использованием его учетной записи</li>
+                </ul>
+
+                <h3>Оплата услуг</h3>
+                <p>Стоимость услуг зарядки указывается в приложении перед началом сессии. Оплата производится автоматически с привязанной банковской карты после завершения зарядной сессии.</p>
+
+                <h3>Ответственность</h3>
+                <p>Сервис не несет ответственности за:</p>
+                <ul>
+                    <li>Невозможность использования услуг по причинам, не зависящим от Сервиса</li>
+                    <li>Действия третьих лиц</li>
+                    <li>Неправильную эксплуатацию оборудования Пользователем</li>
+                    <li>Последствия форс-мажорных обстоятельств</li>
+                </ul>
+
+                <h3>Конфиденциальность</h3>
+                <p>Сервис обязуется не разглашать персональные данные Пользователя третьим лицам, за исключением случаев, предусмотренных законодательством Российской Федерации.</p>
+
+                <p style="text-align: center; color: #666; margin-top: 20px; font-style: italic;">
+                    Полная версия пользовательского соглашения доступна на нашем сайте:
+                    <a href="https://zero-emission.ru/terms-of-use/"
+                       onclick="window.Telegram.WebApp.openLink('https://zero-emission.ru/terms-of-use/'); return false;"
+                       style="color: #007AFF; text-decoration: none;">
+                        zero-emission.ru/terms-of-use/
+                    </a>
+                </p>
+            </div>
+        </div>
+        <button class="btn btn-back" id="backFromTermsBtn">Назад</button>
+    </div>
 </div>
 
 <iframe class="game-frame" id="clumsyBirdFrame" allow="fullscreen" src="about:blank"></iframe>
 <iframe class="game-frame" id="pacmanFrame" allow="fullscreen" src="about:blank"></iframe>
-<iframe class="terms-frame" id="termsFrame" src="about:blank"></iframe>
 
 <script>
     const tg = window.Telegram.WebApp;
@@ -414,6 +487,7 @@
         document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'none';
         document.getElementById('feedbackMenu').style.display = 'none';
+        document.getElementById('termsMenu').style.display = 'none';
         document.querySelectorAll('#app > button').forEach(btn => {
             btn.style.display = 'block';
         });
@@ -431,6 +505,7 @@
         document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'none';
         document.getElementById('feedbackMenu').style.display = 'none';
+        document.getElementById('termsMenu').style.display = 'none';
         tg.BackButton.show();
         tg.BackButton.offClick(showMainMenu);
         tg.BackButton.onClick(showMainMenu);
@@ -447,6 +522,7 @@
         document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'none';
         document.getElementById('feedbackMenu').style.display = 'none';
+        document.getElementById('termsMenu').style.display = 'none';
         tg.BackButton.show();
         tg.BackButton.offClick(showMainMenu);
         tg.BackButton.onClick(showMainMenu);
@@ -463,6 +539,7 @@
         document.getElementById('aboutMenu').style.display = 'flex';
         document.getElementById('faqMenu').style.display = 'none';
         document.getElementById('feedbackMenu').style.display = 'none';
+        document.getElementById('termsMenu').style.display = 'none';
         tg.BackButton.show();
         tg.BackButton.offClick(showMainMenu);
         tg.BackButton.onClick(showMainMenu);
@@ -479,6 +556,7 @@
         document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'flex';
         document.getElementById('feedbackMenu').style.display = 'none';
+        document.getElementById('termsMenu').style.display = 'none';
         tg.BackButton.show();
         tg.BackButton.offClick(showAboutMenu);
         tg.BackButton.onClick(showAboutMenu);
@@ -495,28 +573,27 @@
         document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'none';
         document.getElementById('feedbackMenu').style.display = 'flex';
+        document.getElementById('termsMenu').style.display = 'none';
         tg.BackButton.show();
         tg.BackButton.offClick(showAboutMenu);
         tg.BackButton.onClick(showAboutMenu);
     }
 
-    function showTerms() {
+    function showTermsMenu() {
         currentView = 'terms';
-        document.getElementById('app').style.display = 'none';
-        const frame = document.getElementById('termsFrame');
-        frame.src = 'http://zero-emission.ru/terms-of-use/';
-        frame.style.display = 'block';
-
+        document.getElementById('app').style.display = 'flex';
+        document.querySelectorAll('#app > button').forEach(btn => {
+            btn.style.display = 'none';
+        });
+        document.getElementById('gamesMenu').style.display = 'none';
+        document.getElementById('appStoreMenu').style.display = 'none';
+        document.getElementById('aboutMenu').style.display = 'none';
+        document.getElementById('faqMenu').style.display = 'none';
+        document.getElementById('feedbackMenu').style.display = 'none';
+        document.getElementById('termsMenu').style.display = 'flex';
         tg.BackButton.show();
-        tg.BackButton.offClick(closeTerms);
-        tg.BackButton.onClick(closeTerms);
-    }
-
-    function closeTerms() {
-        const frame = document.getElementById('termsFrame');
-        frame.src = 'about:blank';
-        frame.style.display = 'none';
-        showAboutMenu();
+        tg.BackButton.offClick(showAboutMenu);
+        tg.BackButton.onClick(showAboutMenu);
     }
 
     function openGame(frameId) {
@@ -567,6 +644,7 @@
         document.getElementById('backFromAboutBtn').addEventListener('click', showMainMenu);
         document.getElementById('backFromFaqBtn').addEventListener('click', showAboutMenu);
         document.getElementById('backFromFeedbackBtn').addEventListener('click', showAboutMenu);
+        document.getElementById('backFromTermsBtn').addEventListener('click', showAboutMenu);
 
         // Обработчики игр
         document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
@@ -586,7 +664,7 @@
 
         // Обработчики меню "О приложении"
         document.getElementById('faqFromAboutBtn').addEventListener('click', showFaqMenu);
-        document.getElementById('termsBtn').addEventListener('click', showTerms);
+        document.getElementById('termsBtn').addEventListener('click', showTermsMenu);
         document.getElementById('feedbackBtn').addEventListener('click', showFeedbackMenu);
 
         // Обработчики для FAQ
@@ -601,9 +679,10 @@
         document.body.addEventListener('touchmove', (e) => {
             // Разрешаем скролл только для элементов с overflow
             if (e.target.closest('.faq-container') || e.target.closest('.feedback-container') ||
-                e.target.closest('#gamesMenu') || e.target.closest('#appStoreMenu') ||
-                e.target.closest('#aboutMenu') || e.target.closest('#faqMenu') ||
-                e.target.closest('#feedbackMenu') || e.target.closest('.terms-frame')) {
+                e.target.closest('.terms-container') || e.target.closest('#gamesMenu') ||
+                e.target.closest('#appStoreMenu') || e.target.closest('#aboutMenu') ||
+                e.target.closest('#faqMenu') || e.target.closest('#feedbackMenu') ||
+                e.target.closest('#termsMenu')) {
                 return;
             }
             e.preventDefault();
