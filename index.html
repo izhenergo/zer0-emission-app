@@ -81,13 +81,22 @@
             margin-bottom: 40px;
         }
 
-        #gamesMenu, #appStoreMenu, #faqMenu {
+        #gamesMenu, #appStoreMenu, #aboutMenu, #feedbackMenu {
             display: none;
             flex-direction: column;
             align-items: center;
             width: 100%;
             max-height: 80vh;
             overflow-y: auto;
+            padding: 0 20px;
+        }
+
+        #faqMenu {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
             padding: 0 20px;
         }
 
@@ -120,7 +129,7 @@
             color: #1a1a1a;
         }
 
-        .btn-faq {
+        .btn-about {
             background: #EFEFEF;
             color: #1a1a1a;
         }
@@ -133,6 +142,11 @@
         .btn-game {
             background: #B7DB2A;
             color: white;
+        }
+
+        .btn-about-item {
+            background: #EFEFEF;
+            color: #1a1a1a;
         }
 
         .btn-store {
@@ -225,6 +239,15 @@
         .faq-container {
             width: 100%;
             max-width: 320px;
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 20px;
+        }
+
+        .feedback-container {
+            width: 100%;
+            max-width: 320px;
             margin-bottom: 20px;
             flex: 1;
             overflow-y: auto;
@@ -286,7 +309,7 @@
     <button class="btn btn-support" id="supportBtn">Техническая поддержка</button>
     <button class="btn btn-play" id="playBtn">Игры</button>
     <button class="btn btn-app" id="appBtn">Мобильное приложение</button>
-    <button class="btn btn-faq" id="faqBtn">Частые вопросы</button>
+    <button class="btn btn-about" id="aboutBtn">О приложении</button>
 
     <div id="gamesMenu">
         <h2>Выберите игру</h2>
@@ -318,6 +341,14 @@
         <button class="btn btn-back" id="backFromStoreBtn">Назад</button>
     </div>
 
+    <div id="aboutMenu">
+        <h2>О приложении</h2>
+        <button class="btn btn-about-item" id="faqFromAboutBtn">Частые вопросы</button>
+        <button class="btn btn-about-item" id="termsBtn">Пользовательское соглашение</button>
+        <button class="btn btn-about-item" id="feedbackBtn">Обратная связь</button>
+        <button class="btn btn-back" id="backFromAboutBtn">Назад</button>
+    </div>
+
     <div id="faqMenu">
         <h2>Частые вопросы</h2>
         <div class="faq-container">
@@ -340,9 +371,19 @@
             <div class="faq-item">
                 <div class="faq-question">Что делать в случае чрезвычайной ситуации?</div>
                 <div class="faq-answer">В случае возгорания ЭЗС или появления дыма из неё во время зарядной сессии, необходимо по возможности нажать кнопку аварийной остановки на ЭЗС или остановить зарядку через мобильное приложение или из машины, после чего отключить зарядный кабель, отогнать машину и вызвать пожарную службу. После этого обязательно сообщите о произошедшем в нашу службу технической поддержки!<br><br>
+                </div>
             </div>
         </div>
         <button class="btn btn-back" id="backFromFaqBtn">Назад</button>
+    </div>
+
+    <div id="feedbackMenu">
+        <h2>Обратная связь</h2>
+        <div class="feedback-container">
+            <!-- Здесь будет форма обратной связи, которую мы добавим позже -->
+            <p style="text-align: center; color: #666; padding: 20px;">Страница в разработке</p>
+        </div>
+        <button class="btn btn-back" id="backFromFeedbackBtn">Назад</button>
     </div>
 </div>
 
@@ -351,7 +392,7 @@
 
 <script>
     const tg = window.Telegram.WebApp;
-    let currentView = 'main'; // 'main', 'games', 'appstore', 'faq' или 'game'
+    let currentView = 'main'; // 'main', 'games', 'appstore', 'about', 'faq', 'feedback' или 'game'
     let currentGameFrame = null;
 
     // Инициализация WebApp
@@ -365,7 +406,9 @@
         document.getElementById('app').style.display = 'flex';
         document.getElementById('gamesMenu').style.display = 'none';
         document.getElementById('appStoreMenu').style.display = 'none';
+        document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'none';
+        document.getElementById('feedbackMenu').style.display = 'none';
         document.querySelectorAll('#app > button').forEach(btn => {
             btn.style.display = 'block';
         });
@@ -380,7 +423,9 @@
         });
         document.getElementById('gamesMenu').style.display = 'flex';
         document.getElementById('appStoreMenu').style.display = 'none';
+        document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'none';
+        document.getElementById('feedbackMenu').style.display = 'none';
         tg.BackButton.show();
         tg.BackButton.offClick(showMainMenu);
         tg.BackButton.onClick(showMainMenu);
@@ -394,7 +439,25 @@
         });
         document.getElementById('gamesMenu').style.display = 'none';
         document.getElementById('appStoreMenu').style.display = 'flex';
+        document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'none';
+        document.getElementById('feedbackMenu').style.display = 'none';
+        tg.BackButton.show();
+        tg.BackButton.offClick(showMainMenu);
+        tg.BackButton.onClick(showMainMenu);
+    }
+
+    function showAboutMenu() {
+        currentView = 'about';
+        document.getElementById('app').style.display = 'flex';
+        document.querySelectorAll('#app > button').forEach(btn => {
+            btn.style.display = 'none';
+        });
+        document.getElementById('gamesMenu').style.display = 'none';
+        document.getElementById('appStoreMenu').style.display = 'none';
+        document.getElementById('aboutMenu').style.display = 'flex';
+        document.getElementById('faqMenu').style.display = 'none';
+        document.getElementById('feedbackMenu').style.display = 'none';
         tg.BackButton.show();
         tg.BackButton.offClick(showMainMenu);
         tg.BackButton.onClick(showMainMenu);
@@ -408,10 +471,28 @@
         });
         document.getElementById('gamesMenu').style.display = 'none';
         document.getElementById('appStoreMenu').style.display = 'none';
+        document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'flex';
+        document.getElementById('feedbackMenu').style.display = 'none';
         tg.BackButton.show();
-        tg.BackButton.offClick(showMainMenu);
-        tg.BackButton.onClick(showMainMenu);
+        tg.BackButton.offClick(showAboutMenu);
+        tg.BackButton.onClick(showAboutMenu);
+    }
+
+    function showFeedbackMenu() {
+        currentView = 'feedback';
+        document.getElementById('app').style.display = 'flex';
+        document.querySelectorAll('#app > button').forEach(btn => {
+            btn.style.display = 'none';
+        });
+        document.getElementById('gamesMenu').style.display = 'none';
+        document.getElementById('appStoreMenu').style.display = 'none';
+        document.getElementById('aboutMenu').style.display = 'none';
+        document.getElementById('faqMenu').style.display = 'none';
+        document.getElementById('feedbackMenu').style.display = 'flex';
+        tg.BackButton.show();
+        tg.BackButton.offClick(showAboutMenu);
+        tg.BackButton.onClick(showAboutMenu);
     }
 
     function openGame(frameId) {
@@ -451,17 +532,23 @@
         // Назначение обработчиков
         document.getElementById('playBtn').addEventListener('click', showGamesMenu);
         document.getElementById('appBtn').addEventListener('click', showAppStoreMenu);
-        document.getElementById('faqBtn').addEventListener('click', showFaqMenu);
+        document.getElementById('aboutBtn').addEventListener('click', showAboutMenu);
         document.getElementById('supportBtn').addEventListener('click', () => {
             tg.openTelegramLink('https://t.me/Zer0_Emission_Support');
         });
+
+        // Обработчики кнопок назад
         document.getElementById('backBtn').addEventListener('click', showMainMenu);
         document.getElementById('backFromStoreBtn').addEventListener('click', showMainMenu);
-        document.getElementById('backFromFaqBtn').addEventListener('click', showMainMenu);
+        document.getElementById('backFromAboutBtn').addEventListener('click', showMainMenu);
+        document.getElementById('backFromFaqBtn').addEventListener('click', showAboutMenu);
+        document.getElementById('backFromFeedbackBtn').addEventListener('click', showAboutMenu);
 
+        // Обработчики игр
         document.getElementById('clumsyBirdBtn').addEventListener('click', () => openGame('clumsyBirdFrame'));
         document.getElementById('pacmanBtn').addEventListener('click', () => openGame('pacmanFrame'));
 
+        // Обработчики магазинов приложений
         const APP_STORE_URL = 'https://apps.apple.com/ru/app/zero-emission/id1632884066';
         const GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=ru.zero.emission.app';
 
@@ -472,6 +559,18 @@
         document.getElementById('googlePlayBtn').addEventListener('click', () => {
             tg.openLink(GOOGLE_PLAY_URL);
         });
+
+        // Обработчики меню "О приложении"
+        document.getElementById('faqFromAboutBtn').addEventListener('click', showFaqMenu);
+        document.getElementById('termsBtn').addEventListener('click', () => {
+            // Временная заглушка для пользовательского соглашения
+            tg.showPopup({
+                title: 'Пользовательское соглашение',
+                message: 'Функция находится в разработке',
+                buttons: [{ type: 'ok' }]
+            });
+        });
+        document.getElementById('feedbackBtn').addEventListener('click', showFeedbackMenu);
 
         // Обработчики для FAQ
         document.querySelectorAll('.faq-question').forEach(question => {
@@ -484,7 +583,10 @@
         // Блокировка скролла только для body, но разрешаем для контейнеров с контентом
         document.body.addEventListener('touchmove', (e) => {
             // Разрешаем скролл только для элементов с overflow
-            if (e.target.closest('.faq-container') || e.target.closest('#gamesMenu') || e.target.closest('#appStoreMenu') || e.target.closest('#faqMenu')) {
+            if (e.target.closest('.faq-container') || e.target.closest('.feedback-container') ||
+                e.target.closest('#gamesMenu') || e.target.closest('#appStoreMenu') ||
+                e.target.closest('#aboutMenu') || e.target.closest('#faqMenu') ||
+                e.target.closest('#feedbackMenu')) {
                 return;
             }
             e.preventDefault();
