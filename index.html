@@ -81,7 +81,7 @@
             margin-bottom: 40px;
         }
 
-        #gamesMenu, #appStoreMenu, #aboutMenu, #feedbackMenu, #termsMenu {
+        #gamesMenu, #appStoreMenu, #aboutMenu, #termsMenu {
             display: none;
             flex-direction: column;
             align-items: center;
@@ -245,15 +245,6 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        .feedback-container {
-            width: 100%;
-            max-width: 320px;
-            margin-bottom: 20px;
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
         .terms-content {
             padding: 16px;
             background: #F7F7F7;
@@ -379,7 +370,7 @@
         <h2>О приложении</h2>
         <button class="btn btn-about-item" id="faqFromAboutBtn">Частые вопросы</button>
         <button class="btn btn-about-item" id="termsBtn">Пользовательское соглашение</button>
-        <button class="btn btn-about-item" id="feedbackBtn">Обратная связь</button>
+        <button class="btn btn-about-item" id="improvementBtn">Предложить улучшение</button>
         <button class="btn btn-back" id="backFromAboutBtn">Назад</button>
     </div>
 
@@ -409,15 +400,6 @@
             </div>
         </div>
         <button class="btn btn-back" id="backFromFaqBtn">Назад</button>
-    </div>
-
-    <div id="feedbackMenu">
-        <h2>Обратная связь</h2>
-        <div class="feedback-container">
-            <!-- Здесь будет форма обратной связи, которую мы добавим позже -->
-            <p style="text-align: center; color: #666; padding: 20px;">Страница в разработке</p>
-        </div>
-        <button class="btn btn-back" id="backFromFeedbackBtn">Назад</button>
     </div>
 
     <div id="termsMenu">
@@ -453,10 +435,10 @@
 
                 <p style="text-align: center; color: #666; margin-top: 20px; font-style: italic;">
                     Полная версия пользовательского соглашения доступна на нашем сайте:
-                    <a href="https://zero-emission.ru/terms-of-use/"
-                       onclick="window.Telegram.WebApp.openLink('https://zero-emission.ru/terms-of-use/'); return false;"
+                    <a href="https://zero-emission.ru"
+                       onclick="window.Telegram.WebApp.openLink('https://zero-emission.ru'); return false;"
                        style="color: #007AFF; text-decoration: none;">
-                        zero-emission.ru/terms-of-use/
+                        zero-emission.ru
                     </a>
                 </p>
             </div>
@@ -470,7 +452,7 @@
 
 <script>
     const tg = window.Telegram.WebApp;
-    let currentView = 'main'; // 'main', 'games', 'appstore', 'about', 'faq', 'feedback', 'terms' или 'game'
+    let currentView = 'main'; // 'main', 'games', 'appstore', 'about', 'faq', 'terms' или 'game'
     let currentGameFrame = null;
 
     // Инициализация WebApp
@@ -486,7 +468,6 @@
         document.getElementById('appStoreMenu').style.display = 'none';
         document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'none';
-        document.getElementById('feedbackMenu').style.display = 'none';
         document.getElementById('termsMenu').style.display = 'none';
         document.querySelectorAll('#app > button').forEach(btn => {
             btn.style.display = 'block';
@@ -504,7 +485,6 @@
         document.getElementById('appStoreMenu').style.display = 'none';
         document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'none';
-        document.getElementById('feedbackMenu').style.display = 'none';
         document.getElementById('termsMenu').style.display = 'none';
         tg.BackButton.show();
         tg.BackButton.offClick(showMainMenu);
@@ -521,7 +501,6 @@
         document.getElementById('appStoreMenu').style.display = 'flex';
         document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'none';
-        document.getElementById('feedbackMenu').style.display = 'none';
         document.getElementById('termsMenu').style.display = 'none';
         tg.BackButton.show();
         tg.BackButton.offClick(showMainMenu);
@@ -538,7 +517,6 @@
         document.getElementById('appStoreMenu').style.display = 'none';
         document.getElementById('aboutMenu').style.display = 'flex';
         document.getElementById('faqMenu').style.display = 'none';
-        document.getElementById('feedbackMenu').style.display = 'none';
         document.getElementById('termsMenu').style.display = 'none';
         tg.BackButton.show();
         tg.BackButton.offClick(showMainMenu);
@@ -555,24 +533,6 @@
         document.getElementById('appStoreMenu').style.display = 'none';
         document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'flex';
-        document.getElementById('feedbackMenu').style.display = 'none';
-        document.getElementById('termsMenu').style.display = 'none';
-        tg.BackButton.show();
-        tg.BackButton.offClick(showAboutMenu);
-        tg.BackButton.onClick(showAboutMenu);
-    }
-
-    function showFeedbackMenu() {
-        currentView = 'feedback';
-        document.getElementById('app').style.display = 'flex';
-        document.querySelectorAll('#app > button').forEach(btn => {
-            btn.style.display = 'none';
-        });
-        document.getElementById('gamesMenu').style.display = 'none';
-        document.getElementById('appStoreMenu').style.display = 'none';
-        document.getElementById('aboutMenu').style.display = 'none';
-        document.getElementById('faqMenu').style.display = 'none';
-        document.getElementById('feedbackMenu').style.display = 'flex';
         document.getElementById('termsMenu').style.display = 'none';
         tg.BackButton.show();
         tg.BackButton.offClick(showAboutMenu);
@@ -589,7 +549,6 @@
         document.getElementById('appStoreMenu').style.display = 'none';
         document.getElementById('aboutMenu').style.display = 'none';
         document.getElementById('faqMenu').style.display = 'none';
-        document.getElementById('feedbackMenu').style.display = 'none';
         document.getElementById('termsMenu').style.display = 'flex';
         tg.BackButton.show();
         tg.BackButton.offClick(showAboutMenu);
@@ -637,13 +596,15 @@
         document.getElementById('supportBtn').addEventListener('click', () => {
             tg.openTelegramLink('https://t.me/Zer0_Emission_Support');
         });
+        document.getElementById('improvementBtn').addEventListener('click', () => {
+            tg.openTelegramLink('https://t.me/Zer0_Emission_Support');
+        });
 
         // Обработчики кнопок назад
         document.getElementById('backBtn').addEventListener('click', showMainMenu);
         document.getElementById('backFromStoreBtn').addEventListener('click', showMainMenu);
         document.getElementById('backFromAboutBtn').addEventListener('click', showMainMenu);
         document.getElementById('backFromFaqBtn').addEventListener('click', showAboutMenu);
-        document.getElementById('backFromFeedbackBtn').addEventListener('click', showAboutMenu);
         document.getElementById('backFromTermsBtn').addEventListener('click', showAboutMenu);
 
         // Обработчики игр
@@ -665,7 +626,6 @@
         // Обработчики меню "О приложении"
         document.getElementById('faqFromAboutBtn').addEventListener('click', showFaqMenu);
         document.getElementById('termsBtn').addEventListener('click', showTermsMenu);
-        document.getElementById('feedbackBtn').addEventListener('click', showFeedbackMenu);
 
         // Обработчики для FAQ
         document.querySelectorAll('.faq-question').forEach(question => {
@@ -678,10 +638,9 @@
         // Блокировка скролла только для body, но разрешаем для контейнеров с контентом
         document.body.addEventListener('touchmove', (e) => {
             // Разрешаем скролл только для элементов с overflow
-            if (e.target.closest('.faq-container') || e.target.closest('.feedback-container') ||
-                e.target.closest('.terms-container') || e.target.closest('#gamesMenu') ||
-                e.target.closest('#appStoreMenu') || e.target.closest('#aboutMenu') ||
-                e.target.closest('#faqMenu') || e.target.closest('#feedbackMenu') ||
+            if (e.target.closest('.faq-container') || e.target.closest('.terms-container') ||
+                e.target.closest('#gamesMenu') || e.target.closest('#appStoreMenu') ||
+                e.target.closest('#aboutMenu') || e.target.closest('#faqMenu') ||
                 e.target.closest('#termsMenu')) {
                 return;
             }
